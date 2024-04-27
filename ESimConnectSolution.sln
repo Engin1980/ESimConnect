@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESimConnect", "ESimConnect\ESimConnect.csproj", "{6FBE7F7D-24CC-4BF1-98C1-4E3436CDCC2F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESimConnectTest", "ESimConnectTest\ESimConnectTest.csproj", "{9232F42D-9012-4F40-9338-D8EBAE77481A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DLLs", "DLLs", "{95F4DEB8-6FA6-464A-8EA6-8DB8439D4BA3}"
+	ProjectSection(SolutionItems) = preProject
+		DLLs\ELogging.dll = DLLs\ELogging.dll
+		DLLs\ESystem.dll = DLLs\ESystem.dll
+		DLLs\Microsoft.FlightSimulator.SimConnect.dll = DLLs\Microsoft.FlightSimulator.SimConnect.dll
+		DLLs\SimConnect.dll = DLLs\SimConnect.dll
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6FBE7F7D-24CC-4BF1-98C1-4E3436CDCC2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FBE7F7D-24CC-4BF1-98C1-4E3436CDCC2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FBE7F7D-24CC-4BF1-98C1-4E3436CDCC2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FBE7F7D-24CC-4BF1-98C1-4E3436CDCC2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9232F42D-9012-4F40-9338-D8EBAE77481A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9232F42D-9012-4F40-9338-D8EBAE77481A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9232F42D-9012-4F40-9338-D8EBAE77481A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9232F42D-9012-4F40-9338-D8EBAE77481A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E1CEC6B8-45BC-4B0C-98ED-A0B48A9D3EA7}
+	EndGlobalSection
+EndGlobal

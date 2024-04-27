@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Mock\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ELogging">
+      <HintPath>..\DLLs\ELogging.dll</HintPath>
+    </Reference>
+    <Reference Include="ESystem">
+      <HintPath>..\DLLs\ESystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.FlightSimulator.SimConnect">
+      <HintPath>..\..\DLLs\Microsoft.FlightSimulator.SimConnect.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
