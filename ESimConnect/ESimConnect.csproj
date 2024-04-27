@@ -19,7 +19,7 @@
       <HintPath>..\DLLs\ESystem.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.FlightSimulator.SimConnect">
-      <HintPath>..\..\DLLs\Microsoft.FlightSimulator.SimConnect.dll</HintPath>
+      <HintPath>..\DLLs\Microsoft.FlightSimulator.SimConnect.dll</HintPath>
     </Reference>
   </ItemGroup>
 

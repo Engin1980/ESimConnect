@@ -1,19 +1,21 @@
 ﻿using ESimConnect;
 using ESimConnect.Definitions;
+using ESystem.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static ESimConnectTest.SharedFunctions;
 
 namespace ESimConnectTest
 {
   internal class TypesTest
   {
-    private static Dictionary<int, Type> requests = new();
-    private static ESimConnect.ESimConnect eSimCon = new();
-    
+    private static readonly Dictionary<int, Type> requests = new();
+    private static readonly ESimConnect.ESimConnect eSimCon = new();
+
     #region Types
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct TypeA
@@ -54,7 +56,7 @@ namespace ESimConnectTest
     public static void Run()
     {
       Console.WriteLine("Starting non-WPF");
-      Open();
+      Open(eSimCon, ESimCon_Connected, ESimCon_EventInvoked, ESimCon_DataReceived, ESimCon_Disconnected, ESimCon_ThrowsException);
       Sleep(500);
       RegisterA();
       RequestOnceA();
@@ -66,15 +68,9 @@ namespace ESimConnectTest
       Sleep(10000);
       DeleteA();
       Sleep(10000);
-      Close();
+      Close(eSimCon);
       Sleep(1000);
       Console.WriteLine("Done");
-    }
-    
-    private static void Close()
-    {
-      Console.WriteLine("Closing");
-      eSimCon.Close();
     }
 
     private static void DeleteA()
@@ -116,40 +112,6 @@ namespace ESimConnectTest
       eSimCon.Types.RegisterType<TypeA>(false);
     }
 
-    private static void Open()
-    {
-      Console.WriteLine("Opening");
-
-      eSimCon.Connected += ESimCon_Connected;
-      eSimCon.EventInvoked += ESimCon_EventInvoked;
-      eSimCon.DataReceived += ESimCon_DataReceived;
-      eSimCon.Disconnected += ESimCon_Disconnected;
-      eSimCon.ThrowsException += ESimCon_ThrowsException;
-
-      while (eSimCon.IsOpened == false)
-      {
-        try
-        {
-          eSimCon.Open();
-        }
-        catch (Exception ex)
-        {
-          Console.WriteLine(ex.Message);
-          Sleep(500);
-        }
-      }
-    }
-
-    private static void ESimCon_ThrowsException(ESimConnect.ESimConnect sender, SimConnectException ex)
-    {
-      Console.WriteLine("ESimCon - ThrowsException - " + ex.ToString());
-    }
-
-    private static void ESimCon_Disconnected(ESimConnect.ESimConnect sender)
-    {
-      Console.WriteLine("ESimCon - Disconnected");
-    }
-
     private static void ESimCon_DataReceived(ESimConnect.ESimConnect sender, ESimConnect.ESimConnect.ESimConnectDataReceivedEventArgs e)
     {
       Type? type = null;
@@ -169,25 +131,10 @@ namespace ESimConnectTest
         var fields = type.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
         foreach (var field in fields)
         {
-          object value = field.GetValue(e.Data);
+          object value = field.GetValue(e.Data) ?? throw new UnexpectedNullException();
           Console.WriteLine($"\t{field.Name} = {value}");
         }
       }
-    }
-
-    private static void ESimCon_EventInvoked(ESimConnect.ESimConnect sender, ESimConnect.ESimConnect.ESimConnectEventInvokedEventArgs e)
-    {
-      Console.WriteLine($"ESimCon - Event invoked - event={e.Event}, requestId={e.RequestId}, value={e.Value}");
-    }
-
-    private static void ESimCon_Connected(ESimConnect.ESimConnect sender)
-    {
-      Console.WriteLine("ESimCon - Connected");
-    }
-    private static void Sleep(int ms)
-    {
-      Console.WriteLine("Sleeping for " + ms + " ms");
-      Thread.Sleep(ms);
     }
   }
 }

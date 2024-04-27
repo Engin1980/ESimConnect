@@ -34,7 +34,7 @@ namespace ESimConnect
 
       static TypeSize()
       {
-        var dm = new DynamicMethod("SizeOfType", typeof(int), new Type[] { });
+        var dm = new DynamicMethod("SizeOfType", typeof(int), Array.Empty<Type>());
         ILGenerator il = dm.GetILGenerator();
         il.Emit(OpCodes.Sizeof, typeof(T));
         il.Emit(OpCodes.Ret);
@@ -92,13 +92,13 @@ namespace ESimConnect
 
     #region Delegates
 
-    public delegate void ESimConnectDataReceivedDelegate(ESimConnect sender, ESimConnectDataReceivedEventArgs e);
+    public delegate void ESimConnectDataReceivedDelegate(ESimConnect _, ESimConnectDataReceivedEventArgs e);
 
-    public delegate void ESimConnectDelegate(ESimConnect sender);
+    public delegate void ESimConnectDelegate(ESimConnect _);
 
-    public delegate void ESimConnectEventInvokedDelegate(ESimConnect sender, ESimConnectEventInvokedEventArgs e);
+    public delegate void ESimConnectEventInvokedDelegate(ESimConnect _, ESimConnectEventInvokedEventArgs e);
 
-    public delegate void ESimConnectExceptionDelegate(ESimConnect sender, SimConnectException ex);
+    public delegate void ESimConnectExceptionDelegate(ESimConnect _, SimConnectException ex);
 
     #endregion Delegates
 
@@ -127,6 +127,7 @@ namespace ESimConnect
       }
     }
 
+    //TODO refactor methods to be Register/Request/Unregister
     public class TypesHandler : BaseHandler
     {
       private readonly TypeManager typeManager = new();
@@ -164,7 +165,6 @@ namespace ESimConnect
         return (int)eTypeId;
       }
 
-      //TODO should be "RequestType(...)"
       public void RequestData<T>(out int requestId)
       {
         uint radius = 0;
@@ -266,12 +266,12 @@ namespace ESimConnect
       }
     }
 
-    public class EventsHandler : BaseHandler
+    public class SystemEventsHandler : BaseHandler
     {
       private record EventIdName(EEnum EventId, string EventName);
       private readonly List<EventIdName> eventManager = new();
 
-      public EventsHandler(ESimConnect parent) : base(parent)
+      public SystemEventsHandler(ESimConnect parent) : base(parent)
       {
       }
 
@@ -315,7 +315,7 @@ namespace ESimConnect
 
       }
 
-      private void ValidateSystemEventName(string eventName)
+      private static void ValidateSystemEventName(string eventName)
       {
         bool findEvent(string simVarName, Type? cls = null)
         {
@@ -361,7 +361,7 @@ namespace ESimConnect
 
     public class ClientEventsHandler : BaseHandler
     {
-      private EEnum GROUP_ID_PRIORITY_STANDARD = (EEnum)1900000000;
+      private readonly EEnum GROUP_ID_PRIORITY_STANDARD = (EEnum)1900000000;
 
       public ClientEventsHandler(ESimConnect parent) : base(parent)
       {
@@ -575,7 +575,7 @@ namespace ESimConnect
     private readonly RequestDataManager requestDataManager = new();
     private readonly RequestExceptionManager requestExceptionManager = new();
     private readonly TypesHandler _Types;
-    private readonly EventsHandler _Events;
+    private readonly SystemEventsHandler _Events;
     private readonly PrimitivesHandler _Primitives;
     private readonly ClientEventsHandler _ClientEvents;
     private readonly WinHandleManager winHandleManager = new();
@@ -585,7 +585,7 @@ namespace ESimConnect
     #region Properties
 
     public TypesHandler Types => _Types;
-    public EventsHandler Events => _Events;
+    public SystemEventsHandler Events => _Events;
     public PrimitivesHandler Primitives => _Primitives;
     public ClientEventsHandler ClientEvents => _ClientEvents;
 
@@ -635,6 +635,7 @@ namespace ESimConnect
       Logger.LogMethodStart();
       Close();
       Logger.LogMethodEnd();
+      GC.SuppressFinalize(this);
     }
 
     public void Open()
@@ -682,7 +683,7 @@ namespace ESimConnect
       this.Disconnected?.Invoke(this);
     }
 
-    private void SimConnect_OnRecvEvent(SimConnect sender, SIMCONNECT_RECV_EVENT data)
+    private void SimConnect_OnRecvEvent(SimConnect _, SIMCONNECT_RECV_EVENT data)
     {
       Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvEvent), data);
 
@@ -694,7 +695,7 @@ namespace ESimConnect
       this.EventInvoked?.Invoke(this, e);
     }
 
-    private void SimConnect_OnRecvException(SimConnect sender, SIMCONNECT_RECV_EXCEPTION data)
+    private void SimConnect_OnRecvException(SimConnect _, SIMCONNECT_RECV_EXCEPTION data)
     {
       Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvException), data);
       SIMCONNECT_EXCEPTION ex = (SIMCONNECT_EXCEPTION)data.dwException;
@@ -702,19 +703,19 @@ namespace ESimConnect
       ThrowsException?.Invoke(this, simConnectExceptionType);
     }
 
-    private void SimConnect_OnRecvOpen(SimConnect sender, SIMCONNECT_RECV_OPEN data)
+    private void SimConnect_OnRecvOpen(SimConnect _, SIMCONNECT_RECV_OPEN data)
     {
       Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvOpen), data);
       this.Connected?.Invoke(this);
     }
 
-    private void SimConnect_OnRecvQuit(SimConnect sender, SIMCONNECT_RECV data)
+    private void SimConnect_OnRecvQuit(SimConnect _, SIMCONNECT_RECV data)
     {
       Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvQuit), data);
       this.Disconnected?.Invoke(this);
     }
 
-    private void SimConnect_OnRecvSimobjectData(SimConnect sender, SIMCONNECT_RECV_SIMOBJECT_DATA data)
+    private void SimConnect_OnRecvSimobjectData(SimConnect _, SIMCONNECT_RECV_SIMOBJECT_DATA data)
     {
       Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvSimobjectData), data);
       EEnum iRequest = (EEnum)data.dwRequestID;
@@ -724,7 +725,7 @@ namespace ESimConnect
       this.DataReceived?.Invoke(this, e);
     }
 
-    private void SimConnect_OnRecvSimobjectDataBytype(SimConnect sender, SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE data)
+    private void SimConnect_OnRecvSimobjectDataBytype(SimConnect _, SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE data)
     {
       Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvSimobjectDataBytype), data);
       EEnum iRequest = (EEnum)data.dwRequestID;
@@ -771,7 +772,7 @@ namespace ESimConnect
       {
         string ret;
         int index = simVarName.IndexOf(':');
-        ret = index < 0 ? simVarName : simVarName.Substring(0, index + 1);
+        ret = index < 0 ? simVarName : simVarName[..(index + 1)];
         return ret;
       }
       bool findSimVar(string simVarName, Type? cls = null)

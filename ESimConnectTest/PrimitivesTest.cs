@@ -8,26 +8,27 @@ using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows.Xps.Serialization;
+using static ESimConnectTest.SharedFunctions;
 
 namespace ESimConnectTest
 {
   internal class PrimitivesTest
   {
-    private static ESimConnect.ESimConnect eSimCon = new();
-    private static string[] simVars = new string[]
+    private static readonly ESimConnect.ESimConnect eSimCon = new();
+    private static readonly string[] simVars = new string[]
     {
       "PLANE LATITUDE",
       "PLANE LONGITUDE",
       "PLANE ALTITUDE"
     };
-    private static Dictionary<string, int> simVarIds = new();
-    private static Dictionary<int, string> onceRequestId = new();
-    private static Dictionary<int, string> repeatedRequestId = new();
+    private static readonly Dictionary<string, int> simVarIds = new();
+    private static readonly Dictionary<int, string> onceRequestId = new();
+    private static readonly Dictionary<int, string> repeatedRequestId = new();
 
     public static void Run()
     {
       Console.WriteLine("Starting non-WPF");
-      Open();
+      Open(eSimCon, ESimCon_Connected, ESimCon_EventInvoked, ESimCon_DataReceived, ESimCon_Disconnected, ESimCon_ThrowsException);
       Sleep(500);
       Register();
       RequestOnce();
@@ -38,15 +39,9 @@ namespace ESimConnectTest
       Sleep(3000);
       DeleteAllRepeated();
       Sleep(10000);
-      Close();
+      Close(eSimCon);
       Sleep(1000);
       Console.WriteLine("Done");
-    }
-
-    private static void Close()
-    {
-      Console.WriteLine("Closing");
-      eSimCon.Close();
     }
 
     private static void DeleteAllRepeated()
@@ -82,12 +77,6 @@ namespace ESimConnectTest
       }
     }
 
-    private static void Sleep(int ms)
-    {
-      Console.WriteLine("Sleeping for " + ms + " ms");
-      Thread.Sleep(ms);
-    }
-
     private static void RequestOnce()
     {
       Console.WriteLine("Request once");
@@ -110,62 +99,18 @@ namespace ESimConnectTest
       }
     }
 
-    private static void Open()
-    {
-      Console.WriteLine("Opening");
-
-      eSimCon.Connected += ESimCon_Connected;
-      eSimCon.EventInvoked += ESimCon_EventInvoked;
-      eSimCon.DataReceived += ESimCon_DataReceived;
-      eSimCon.Disconnected += ESimCon_Disconnected;
-      eSimCon.ThrowsException += ESimCon_ThrowsException;
-
-      while (eSimCon.IsOpened == false)
-      {
-        try
-        {
-          eSimCon.Open();
-        }
-        catch (Exception ex)
-        {
-          Console.WriteLine(ex.Message);
-          Sleep(500);
-        }
-      }
-    }
-
-    private static void ESimCon_ThrowsException(ESimConnect.ESimConnect sender, SimConnectException ex)
-    {
-      Console.WriteLine("ESimCon - ThrowsException - " + ex.ToString());
-    }
-
-    private static void ESimCon_Disconnected(ESimConnect.ESimConnect sender)
-    {
-      Console.WriteLine("ESimCon - Disconnected");
-    }
-
     private static void ESimCon_DataReceived(ESimConnect.ESimConnect sender, ESimConnect.ESimConnect.ESimConnectDataReceivedEventArgs e)
     {
       string relatedSimVar;
       if (e.RequestId != null)
       {
-        if (onceRequestId.TryGetValue(e.RequestId.Value, out relatedSimVar) == false)
-          if (repeatedRequestId.TryGetValue(e.RequestId.Value, out relatedSimVar) == false)
+        if (onceRequestId.TryGetValue(e.RequestId.Value, out relatedSimVar!) == false)
+          if (repeatedRequestId.TryGetValue(e.RequestId.Value, out relatedSimVar!) == false)
             relatedSimVar = "??-unrecognized-simvar-??";
       }
       else
         relatedSimVar = "??-non-request-id-simvar-??";
       Console.WriteLine($"ESimCon - DataReceived - requestId={e.RequestId}, simVar={relatedSimVar}, type={e.Type}, data={e.Data}");
-    }
-
-    private static void ESimCon_EventInvoked(ESimConnect.ESimConnect sender, ESimConnect.ESimConnect.ESimConnectEventInvokedEventArgs e)
-    {
-      Console.WriteLine($"ESimCon - Event invoked - event={e.Event}, requestId={e.RequestId}, value={e.Value}");
-    }
-
-    private static void ESimCon_Connected(ESimConnect.ESimConnect sender)
-    {
-      Console.WriteLine("ESimCon - Connected");
     }
   }
 }
