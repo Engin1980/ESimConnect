@@ -1,4 +1,4 @@
-﻿using ESimConnectTest;
+﻿using ESimConnectTest.Tests;
 using System.Windows.Threading;
 
 //PrimitivesTest.Run();

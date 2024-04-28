@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ESimConnect.Definitions;
+using System.ComponentModel.DataAnnotations;
 
 namespace ESimConnect
 {
