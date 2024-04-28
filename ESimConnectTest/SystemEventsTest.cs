@@ -48,7 +48,10 @@ namespace ESimConnectTest
     private static void AskForEvent()
     {
       Console.WriteLine("Waiting for any event invocation... (do something in the sim)...");
-      Monitor.Wait(lck);
+      lock (lck)
+      {
+        Monitor.Wait(lck);
+      }
     }
 
     private static void ESimCon_EventInvoked(ESimConnect.ESimConnect _, ESimConnectEventInvokedEventArgs e)
@@ -57,7 +60,10 @@ namespace ESimConnectTest
         registeredEventName = "??-unknown-event-requestId--??";
 
       Console.WriteLine($"ESimCon - Event invoked - event={e.Event}, requestId={e.RequestId}, registered-event={registeredEventName}, value={e.Value}");
-      Monitor.Pulse(lck);
+      lock (lck)
+      {
+        Monitor.Pulse(lck);
+      }
     }
   }
 }
