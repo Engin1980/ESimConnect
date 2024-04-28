@@ -1,4 +1,5 @@
-﻿using Microsoft.FlightSimulator.SimConnect;
+﻿using ELogging;
+using Microsoft.FlightSimulator.SimConnect;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,6 +30,7 @@ namespace ESimConnect.Types
     private HwndSource? hwndSource = null;
     private HwndSourceHook? hook = null;
     private SimConnect? _SimConnect = null;
+    private readonly Logger logger = Logger.Create(nameof(WinHandleManager));
     public SimConnect? SimConnect { get => _SimConnect; set => _SimConnect = value; }
 
     public delegate void FsExitDetectedDelegate();
@@ -46,12 +48,12 @@ namespace ESimConnect.Types
 
     public void Acquire()
     {
-      Logger.LogMethodStart();
+      logger.LogMethodStart();
       CreateWindow();
       this.hwndSource = HwndSource.FromHwnd(this.windowHandle);
       this.hook = new HwndSourceHook(DefWndProc);
       this.hwndSource.AddHook(this.hook);
-      Logger.LogMethodEnd();
+      logger.LogMethodEnd();
     }
 
     protected IntPtr DefWndProc(IntPtr _hwnd, int msg, IntPtr _wParam, IntPtr _lParam, ref bool handled)
@@ -62,7 +64,7 @@ namespace ESimConnect.Types
       {
         if (this._SimConnect != null && this.hwndSource != null)
         {
-          Logger.Log("DefWndProc", this);
+          logger.Log(LogLevel.TRACE, "DefWndProc");
           try
           {
             this._SimConnect.ReceiveMessage();
@@ -175,6 +177,7 @@ namespace ESimConnect.Types
     public void Dispose()
     {
       Release();
+      GC.SuppressFinalize(this);
     }
   }
 }

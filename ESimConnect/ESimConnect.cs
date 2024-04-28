@@ -119,10 +119,12 @@ namespace ESimConnect
     public abstract class BaseHandler
     {
       protected readonly ESimConnect parent;
+      protected readonly ELogging.Logger logger;
 
       protected BaseHandler(ESimConnect parent)
       {
         this.parent = parent;
+        this.logger = Logger.Create($"{nameof(ESimConnect)}+{this.GetType().Name[..^7]}");
       }
     }
 
@@ -137,7 +139,7 @@ namespace ESimConnect
 
       public int Register<T>(bool validate = false) where T : struct
       {
-        Logger.LogMethodStart();
+        logger.LogMethodStart();
         parent.EnsureConnected();
 
         EEnum eTypeId = IdProvider.GetNextAsEnum();
@@ -159,7 +161,7 @@ namespace ESimConnect
         parent.Try(() => this.parent.simConnect!.RegisterDataDefineStruct<T>(eTypeId),
           ex => new InternalException("Failed to invoke 'simConnect.RegisterDataDefineStruct<T>(...)'.", ex));
         this.typeManager.Register((int)eTypeId, t);
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
 
         return (int)eTypeId;
       }
@@ -182,7 +184,7 @@ namespace ESimConnect
 
       public void Request<T>(int? customRequestId, uint radius, SimConnectSimObjectType simObjectType)
       {
-        Logger.LogMethodStart(new object?[] { customRequestId, radius, simObjectType });
+        logger.LogMethodStart(new object?[] { customRequestId, radius, simObjectType });
         parent.EnsureConnected();
 
         EEnum eTypeId = typeManager.GetIdAsEnum(typeof(T));
@@ -192,7 +194,7 @@ namespace ESimConnect
         parent.Try(() => this.parent.simConnect!.RequestDataOnSimObjectType(eRequestId, eTypeId, radius, simConObjectType),
           ex => throw new InternalException("Failed to invoke 'RequestDataOnSimObjectType(...)'.", ex));
         this.parent.requestDataManager.Register(customRequestId, typeof(T), eRequestId);
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
       }
 
       public void RequestRepeatedly<T>(SimConnectPeriod period, bool sendOnlyOnChange = true,
@@ -213,7 +215,7 @@ namespace ESimConnect
         int? customRequestId, SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
       {
-        Logger.LogMethodStart(new object?[] {
+        logger.LogMethodStart(new object?[] {
         customRequestId, period, sendOnlyOnChange, initialDelayFrames,
         skipBetweenFrames, numberOfReturnedFrames });
         if (this.parent.simConnect == null) throw new NotConnectedException();
@@ -235,7 +237,7 @@ namespace ESimConnect
             flag, (uint)initialDelayFrames, (uint)skipBetweenFrames, (uint)numberOfReturnedFrames),
           ex => new InternalException($"Failed to invoke 'RequestDataOnSimObject(...)'.", ex));
         this.parent.requestDataManager.Register(customRequestId, typeof(T), eRequestId);
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
       }
 
 
@@ -246,7 +248,7 @@ namespace ESimConnect
 
       public void Unregister(Type t)
       {
-        Logger.LogMethodStart();
+        logger.LogMethodStart();
         parent.EnsureConnected();
 
         EEnum eTypeId = typeManager.GetIdAsEnum(t);
@@ -255,7 +257,7 @@ namespace ESimConnect
           () => this.parent.simConnect!.ClearDataDefinition(eTypeId),
           ex => new InternalException($"Failed to unregister type {t.Name}.", ex));
         this.typeManager.Unregister(t);
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
       }
 
       public void UnregisterAll()
@@ -276,7 +278,7 @@ namespace ESimConnect
 
       public void Register(string eventName, out int eventId, bool validate = false)
       {
-        Logger.LogMethodStart();
+        logger.LogMethodStart();
         parent.EnsureConnected();
 
         if (validate) ValidateSystemEventName(eventName);
@@ -297,7 +299,7 @@ namespace ESimConnect
           eEventId = tmp.EventId;
 
         eventId = (int)eEventId;
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
       }
 
       public void Unregister(int eventId)
@@ -369,13 +371,13 @@ namespace ESimConnect
 
       public void Invoke(string eventName, uint[]? parameters = null, bool validate = false)
       {
-        Logger.LogMethodStart();
+        logger.LogMethodStart();
         parent.EnsureConnected();
 
         parameters ??= Array.Empty<uint>();
 
         // up to 5 parameters available, but probably with a different .ddl version
-        if (parameters.Length > 1) throw 
+        if (parameters.Length > 1) throw
             new NotImplementedException($"Maximum expected number of parameters is {1} (provided {parameters.Length}).");
 
         if (validate) Validate(eventName, parameters);
@@ -434,7 +436,7 @@ namespace ESimConnect
       public int Register<T>(string simVarName, string unit = "Number", SimConnectSimTypeName simTypeName = SimConnectSimTypeName.FLOAT64,
         int epsilon = 0, bool validate = false)
       {
-        Logger.LogMethodStart();
+        logger.LogMethodStart();
         parent.EnsureConnected();
 
         SIMCONNECT_DATATYPE simType = EnumConverter.ConvertEnum2<SimConnectSimTypeName, SIMCONNECT_DATATYPE>(simTypeName);
@@ -453,7 +455,7 @@ namespace ESimConnect
 
         this.primitiveManager.Register((int)eTypeId, typeof(T));
 
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
         return (int)eTypeId;
       }
 
@@ -471,7 +473,7 @@ namespace ESimConnect
 
       public int Request(int typeId, int customRequestId, uint radius, SimConnectSimObjectType simObjectType)
       {
-        Logger.LogMethodStart(new object?[] { typeId, customRequestId, radius });
+        logger.LogMethodStart(new object?[] { typeId, customRequestId, radius });
         parent.EnsureConnected();
         this.EnsurePrimitiveTypeIdExists(typeId);
 
@@ -482,7 +484,7 @@ namespace ESimConnect
         EEnum eRequestId = IdProvider.GetNextAsEnum();
         parent.simConnect!.RequestDataOnSimObjectType(eRequestId, eTypeId, radius, sst);
         parent.requestDataManager.Register(customRequestId, t, eRequestId);
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
         return customRequestId;
       }
 
@@ -496,7 +498,7 @@ namespace ESimConnect
       public void RequestRepeatedly(int typeId, int customRequestId, SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
       {
-        Logger.LogMethodStart(new object?[] {
+        logger.LogMethodStart(new object?[] {
         customRequestId, period, sendOnlyOnChange, initialDelayFrames,
         skipBetweenFrames, numberOfReturnedFrames });
         if (parent.simConnect == null) throw new NotConnectedException();
@@ -521,12 +523,12 @@ namespace ESimConnect
             flag, (uint)initialDelayFrames, (uint)skipBetweenFrames, (uint)numberOfReturnedFrames),
           ex => new InternalException($"Failed to invoke 'RequestDataOnSimObject(...)'.", ex));
         parent.requestDataManager.Register(customRequestId, type, eRequestId);
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
       }
 
       public void Send<T>(int typeId, T value)
       {
-        Logger.LogMethodStart();
+        logger.LogMethodStart();
         parent.EnsureConnected();
         if (value == null) throw new ArgumentNullException(nameof(value));
 
@@ -539,12 +541,12 @@ namespace ESimConnect
         EEnum eTypeId = (EEnum)typeId;
         parent.simConnect!.SetDataOnSimObject(eTypeId, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, value);
 
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
       }
 
       public void Unregister(int typeId)
       {
-        Logger.LogMethodStart();
+        logger.LogMethodStart();
         parent.EnsureConnected();
 
         EEnum eTypeId = (EEnum)typeId;
@@ -552,7 +554,7 @@ namespace ESimConnect
         parent.Try(() => parent.simConnect!.ClearDataDefinition(eTypeId),
           ex => new InternalException($"Failed to unregister typeId {typeId}.", ex));
         this.primitiveManager.Unregister(typeId);
-        Logger.LogMethodEnd();
+        logger.LogMethodEnd();
       }
 
       public void UnregisterAll()
@@ -581,6 +583,7 @@ namespace ESimConnect
     private readonly ClientEventsHandler _ClientEvents;
     private readonly WinHandleManager winHandleManager = new();
     private SimConnect? simConnect;
+    private readonly Logger logger;
     #endregion Fields
 
     #region Properties
@@ -598,7 +601,9 @@ namespace ESimConnect
 
     public ESimConnect()
     {
-      Logger.LogMethodStart();
+      logger = Logger.Create(nameof(ESimConnect));
+
+      logger.LogMethodStart();
 
       winHandleManager.FsExitDetected += (() => ResolveExitedFS2020());
 
@@ -607,7 +612,7 @@ namespace ESimConnect
       this._ClientEvents = new(this);
       this._Values = new(this);
 
-      Logger.LogMethodEnd();
+      logger.LogMethodEnd();
     }
 
     #endregion Constructors
@@ -616,7 +621,7 @@ namespace ESimConnect
 
     public void Close()
     {
-      Logger.LogMethodStart();
+      logger.LogMethodStart();
       if (this.simConnect != null)
       {
         this.Structs.UnregisterAll();
@@ -628,20 +633,20 @@ namespace ESimConnect
         this.simConnect.Dispose();
         this.simConnect = null;
       }
-      Logger.LogMethodEnd();
+      logger.LogMethodEnd();
     }
 
     public void Dispose()
     {
-      Logger.LogMethodStart();
+      logger.LogMethodStart();
       Close();
-      Logger.LogMethodEnd();
+      logger.LogMethodEnd();
       GC.SuppressFinalize(this);
     }
 
     public void Open()
     {
-      Logger.LogMethodStart();
+      logger.LogMethodStart();
       EnsureNotConnected();
 
       Try(
@@ -661,7 +666,7 @@ namespace ESimConnect
       },
         ex => new InternalException("Unable to open connection to FS2020.", ex));
 
-      Logger.LogMethodEnd();
+      logger.LogMethodEnd();
     }
 
     private void EnsureConnected()
@@ -686,7 +691,7 @@ namespace ESimConnect
 
     private void SimConnect_OnRecvEvent(SimConnect _, SIMCONNECT_RECV_EVENT data)
     {
-      Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvEvent), data);
+      logger.LogObject("Event " + nameof(SimConnect_OnRecvEvent), data);
 
       EEnum eEventId = (EEnum)data.uEventID;
       string eventName = this.SystemEvents.GetEventNameByEventId(eEventId);
@@ -698,7 +703,7 @@ namespace ESimConnect
 
     private void SimConnect_OnRecvException(SimConnect _, SIMCONNECT_RECV_EXCEPTION data)
     {
-      Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvException), data);
+      logger.LogObject("Event " + nameof(SimConnect_OnRecvException), data);
       SIMCONNECT_EXCEPTION ex = (SIMCONNECT_EXCEPTION)data.dwException;
       SimConnectException simConnectExceptionType = EnumConverter.ConvertEnum2<SIMCONNECT_EXCEPTION, SimConnectException>(ex);
       ThrowsException?.Invoke(this, simConnectExceptionType);
@@ -706,19 +711,19 @@ namespace ESimConnect
 
     private void SimConnect_OnRecvOpen(SimConnect _, SIMCONNECT_RECV_OPEN data)
     {
-      Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvOpen), data);
+      logger.LogObject("Event " + nameof(SimConnect_OnRecvOpen), data);
       this.Connected?.Invoke(this);
     }
 
     private void SimConnect_OnRecvQuit(SimConnect _, SIMCONNECT_RECV data)
     {
-      Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvQuit), data);
+      logger.LogObject("Event " + nameof(SimConnect_OnRecvQuit), data);
       this.Disconnected?.Invoke(this);
     }
 
     private void SimConnect_OnRecvSimobjectData(SimConnect _, SIMCONNECT_RECV_SIMOBJECT_DATA data)
     {
-      Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvSimobjectData), data);
+      logger.LogObject("Event " + nameof(SimConnect_OnRecvSimobjectData), data);
       EEnum iRequest = (EEnum)data.dwRequestID;
       object ret = data.dwData[0];
       requestDataManager.Recall(iRequest, out Type type, out int? userRequestId);
@@ -728,7 +733,8 @@ namespace ESimConnect
 
     private void SimConnect_OnRecvSimobjectDataBytype(SimConnect _, SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE data)
     {
-      Logger.LogInvokedEvent(this, nameof(SimConnect_OnRecvSimobjectDataBytype), data);
+      logger.LogObject("Event " + nameof(SimConnect_OnRecvSimobjectDataBytype), data);
+
       EEnum iRequest = (EEnum)data.dwRequestID;
       requestDataManager.Recall(iRequest, out Type type, out int? userRequestId);
       object ret = data.dwData[0];
@@ -746,7 +752,7 @@ namespace ESimConnect
       catch (Exception ex)
       {
         Exception newException = exceptionProducer.Invoke(ex);
-        Logger.LogException(newException);
+        logger.LogException(newException);
         throw newException;
       }
     }
@@ -761,7 +767,7 @@ namespace ESimConnect
       catch (Exception ex)
       {
         Exception newException = exceptionProducer.Invoke(ex);
-        Logger.LogException(newException);
+        logger.LogException(newException);
         throw newException;
       }
       return ret;
