@@ -13,6 +13,7 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -211,6 +212,7 @@ namespace ESimConnect
           initialDelayFrames, skipBetweenFrames, numberOfReturnedFrames);
       }
 
+      // TODO those functions are missing equivalents with "Type t" as param instead of generic param.
       public void RequestRepeatedly<T>(
         int? customRequestId, SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
@@ -236,7 +238,7 @@ namespace ESimConnect
             eRequestId, eTypeId, SimConnect.SIMCONNECT_OBJECT_ID_USER, simConPeriod,
             flag, (uint)initialDelayFrames, (uint)skipBetweenFrames, (uint)numberOfReturnedFrames),
           ex => new InternalException($"Failed to invoke 'RequestDataOnSimObject(...)'.", ex));
-        this.parent.requestDataManager.Register(customRequestId, typeof(T), eRequestId);
+        this.parent.requestDataManager.Register(customRequestId, typeof(T), eRequestId, simConPeriod);
         logger.LogMethodEnd();
       }
 
@@ -259,6 +261,32 @@ namespace ESimConnect
         this.typeManager.Unregister(t);
         logger.LogMethodEnd();
       }
+
+
+      //public void UnregisterSafely<T>()
+      //{
+      //  UnregisterSafely(typeof(T));
+      //}
+      //public void UnregisterSafely(Type t)
+      //{
+      //  logger.LogMethodStart(new object[] { t });
+      //  parent.EnsureConnected();
+
+      //  EEnum eTypeId = typeManager.GetIdAsEnum(t);
+      //  EEnum eRequestId = this.parent.requestDataManager.GetIdAsEnum(t);
+      //  parent.Try(
+      //    () =>
+      //    {
+      //      this.parent.simConnect!.RequestDataOnSimObject(
+      //        eRequestId, eTypeId, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER,
+      //        SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
+      //      Thread.Sleep(500);
+      //      Unregister
+      //    },
+      //    ex => new InternalException($"Failed to unregister type {t.Name} safely.", ex));
+
+      //  logger.LogMethodEnd();
+      //}
 
       public void UnregisterAll()
       {
@@ -522,9 +550,12 @@ namespace ESimConnect
             eRequestId, eTypeId, SimConnect.SIMCONNECT_OBJECT_ID_USER, simPeriod,
             flag, (uint)initialDelayFrames, (uint)skipBetweenFrames, (uint)numberOfReturnedFrames),
           ex => new InternalException($"Failed to invoke 'RequestDataOnSimObject(...)'.", ex));
-        parent.requestDataManager.Register(customRequestId, type, eRequestId);
+        parent.requestDataManager.Register(customRequestId, type, eRequestId, simPeriod);
+        tmpTypeToRequestId[eTypeId] = eRequestId;
         logger.LogMethodEnd();
       }
+
+      private Dictionary<EEnum, EEnum> tmpTypeToRequestId = new Dictionary<EEnum, EEnum>();
 
       public void Send<T>(int typeId, T value)
       {
@@ -554,6 +585,31 @@ namespace ESimConnect
         parent.Try(() => parent.simConnect!.ClearDataDefinition(eTypeId),
           ex => new InternalException($"Failed to unregister typeId {typeId}.", ex));
         this.primitiveManager.Unregister(typeId);
+        logger.LogMethodEnd();
+      }
+
+      public void UnregisterSafely(int typeId, int safetyDelayMs)
+      {
+        logger.LogMethodStart();
+        parent.EnsureConnected();
+
+        EEnum eTypeId = (EEnum)typeId;
+        EEnum eRequestId = tmpTypeToRequestId[eTypeId];
+
+        parent.Try(() =>
+          parent.simConnect!.RequestDataOnSimObject(
+            eRequestId, eTypeId, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER,
+            SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, (uint)0, (uint)0, (uint)0),
+          ex => new InternalException($"Failed to invoke 'RequestDataOnSimObject(...)'.", ex));
+
+        Thread.Sleep(safetyDelayMs);
+
+        parent.Try(() => parent.simConnect!.ClearDataDefinition(eTypeId),
+          ex => new InternalException($"Failed to unregister typeId {typeId}.", ex));
+        this.primitiveManager.Unregister(typeId);
+
+        tmpTypeToRequestId.Remove(eTypeId);
+
         logger.LogMethodEnd();
       }
 

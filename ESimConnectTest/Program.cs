@@ -9,14 +9,17 @@ SetUpLogging();
 //ValuesTest.Run();
 //StructsTest.Run();
 //ClientEventsTest.Run();
-SystemEventsTest.Run();
+//SystemEventsTest.Run();
+RegisterUnregisterTest.Run();
 
 //TODO test mixing of primitive and type requests - I think that every request will have its custom
 //  request counter, so when received, there will be conflict to distinquish, which 
 //  data has been received (when invoked out of ESimConnect via only one event
 
+
 void SetUpLogging()
 {
+  return; 
   if (File.Exists(LOG_FILE_NAME))
     File.Delete(LOG_FILE_NAME);
 
