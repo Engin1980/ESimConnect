@@ -1,10 +1,12 @@
-﻿using System;
+﻿using ESystem.Asserting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Animation;
 
 namespace ESimConnect.Types
 {
@@ -37,33 +39,42 @@ namespace ESimConnect.Types
     }
   }
 
-  internal class TypeManager : PairManager<int, Type>
+  internal class TypeManager
   {
-    protected override bool IsSame(int a, int b) => a == b;
+    private readonly List<TypeDef> inner = new();
+    public record TypeDef(TypeId TypeId, Type Type);
 
-    protected override bool IsSame(Type a, Type b) => a == b;
-
-    internal EEnum GetIdAsEnum(Type type) => (EEnum)GetId(type);
-
-    public new void Register(int id, Type type) => base.Register(id, type);
-
-    public int GetId(Type type) => base.TryGet(type)
-      .OrThrow(() => new InvalidRequestException($"Type {type} not registered."));
-
-    public Type GetType(int id) => base.TryGet(id)
-      .OrThrow(() => new InvalidRequestException($"Type with id {id} not registered."));
-
-    internal void EnsureTypeRegistered(Type type)
+    public void Register(TypeId typeId, Type type)
     {
-      int _ = GetId(type);
+      EAssert.Argument.IsNotNull(typeId, nameof(typeId));
+      EAssert.Argument.IsNotNull(type, nameof(type));
+      EAssert.IsTrue(inner.Any(q => q.TypeId == typeId));
+      inner.Add(new(typeId, type));
     }
 
-    internal new void Unregister(Type type) => base.Unregister(type);
-
-    internal List<Type> GetRegisteredTypes()
+    public void Unregister(TypeId typeId)
     {
-      return this.GetAllBs();
+      EAssert.IsTrue(inner.Any(q => q.TypeId == typeId));
+      inner.RemoveAll(q => q.TypeId == typeId);
     }
+
+    public Type this[TypeId typeid]
+    {
+      get => inner.SingleOrDefault(q => q.TypeId == typeid)?.Type ?? throw new ESimConnectException($"TypeId '{typeid}' not associated to any type.");
+    }
+
+    public IEnumerable<TypeId> GetByType(Type type) => inner.Where(q => q.Type == type).Select(q => q.TypeId);
+    public TypeId GetByTypeSingle(Type type)
+    {
+      var tmp = GetByType(type);
+      if (tmp.Count() == 0)
+        throw new ESimConnectException($"There is not typeId associated with type '{type.FullName}'.");
+      if (tmp.Count() > 1)
+        throw new ESimConnectException($"There are multiple typeIds associated with type '{type.FullName}'. Try use exact typeId.");
+      return tmp.First();
+    }
+
+    internal IEnumerable<TypeId> GetAllTypeIds() => inner.Select(q => q.TypeId);
   }
 
   internal class EventManager : PairManager<EEnum, string>

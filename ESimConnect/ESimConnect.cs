@@ -1,6 +1,7 @@
 using ELogging;
 using ESimConnect.Enumerations;
 using ESimConnect.Types;
+using ESystem.Asserting;
 using Microsoft.FlightSimulator.SimConnect;
 using System;
 using System.CodeDom;
@@ -16,6 +17,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media.TextFormatting;
+using static ESimConnect.Types.RequestDataManager;
 
 namespace ESimConnect
 {
@@ -129,21 +132,23 @@ namespace ESimConnect
       }
     }
 
-    //TODO refactor methods to be Register/Request/Unregister
+
     public class StructsHandler : BaseHandler
     {
+      private const uint DEFAULT_RADIUS = 0;
+      private const SimConnectSimObjectType DEFAULT_SIMOBJECT_TYPE = SimConnectSimObjectType.USER;
       private readonly TypeManager typeManager = new();
 
       public StructsHandler(ESimConnect parent) : base(parent)
       {
       }
 
-      public int Register<T>(bool validate = false) where T : struct
+      public TypeId Register<T>(bool validate = false) where T : struct
       {
         logger.LogMethodStart();
         parent.EnsureConnected();
 
-        EEnum eTypeId = IdProvider.GetNextAsEnum();
+        TypeId typeId = new(IdProvider.GetNextAsEnum());
         int epsilon = 0;
 
         Type t = typeof(T);
@@ -153,73 +158,76 @@ namespace ESimConnect
         {
           if (validate) parent.ValidateSimVarName(fieldInfo.Name);
           parent.Try(() =>
-            this.parent.simConnect!.AddToDataDefinition(eTypeId,
+            this.parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(),
               fieldInfo.Name, fieldInfo.Unit, fieldInfo.Type,
               epsilon, SimConnect.SIMCONNECT_UNUSED),
             ex => new InternalException("Failed to invoke 'simConnect.AddToDataDefinition(...)'.", ex));
         }
 
-        parent.Try(() => this.parent.simConnect!.RegisterDataDefineStruct<T>(eTypeId),
+        parent.Try(() => this.parent.simConnect!.RegisterDataDefineStruct<T>(typeId.ToEEnum()),
           ex => new InternalException("Failed to invoke 'simConnect.RegisterDataDefineStruct<T>(...)'.", ex));
-        this.typeManager.Register((int)eTypeId, t);
+        this.typeManager.Register(typeId, t);
         logger.LogMethodEnd();
 
-        return (int)eTypeId;
+        return typeId;
       }
 
-      public void Request<T>(out int requestId)
+      public RequestId Request<T>(uint radius = DEFAULT_RADIUS, SimConnectSimObjectType simObjectType = DEFAULT_SIMOBJECT_TYPE)
       {
-        uint radius = 0;
-        requestId = IdProvider.GetNext();
-        Request<T>(requestId, radius, SimConnectSimObjectType.USER);
+        TypeId typeId = typeManager.GetId(typeof(T)); //TODO what if there is more than one registration of the type?
+        RequestId ret = Request(typeId, radius, simObjectType);
+        return ret;
       }
 
-      public void Request<T>(out int requestId, uint radius, SimConnectSimObjectType simObjectType)
+      public RequestId Request(TypeId typeId, uint radius = DEFAULT_RADIUS, SimConnectSimObjectType simObjectType = DEFAULT_SIMOBJECT_TYPE)
       {
-        requestId = IdProvider.GetNext();
-        Request<T>(requestId, radius, simObjectType);
-      }
-
-      public void Request<T>(int? customRequestId = null)
-        => Request<T>(customRequestId, 0, SimConnectSimObjectType.USER);
-
-      public void Request<T>(int? customRequestId, uint radius, SimConnectSimObjectType simObjectType)
-      {
-        logger.LogMethodStart(new object?[] { customRequestId, radius, simObjectType });
+        logger.LogMethodStart(new object?[] { radius, simObjectType });
         parent.EnsureConnected();
 
-        EEnum eTypeId = typeManager.GetIdAsEnum(typeof(T));
-        EEnum eRequestId = IdProvider.GetNextAsEnum();
+        RequestId requestId = new(IdProvider.GetNextAsEnum());
+        Type type = typeManager.GetType(typeId);
         SIMCONNECT_SIMOBJECT_TYPE simConObjectType = EnumConverter.ConvertEnum2<SimConnectSimObjectType, SIMCONNECT_SIMOBJECT_TYPE>(simObjectType);
 
-        parent.Try(() => this.parent.simConnect!.RequestDataOnSimObjectType(eRequestId, eTypeId, radius, simConObjectType),
+        parent.Try(() => this.parent.simConnect!.RequestDataOnSimObjectType(requestId.ToEEnum(), typeId.ToEEnum(), radius, simConObjectType),
           ex => throw new InternalException("Failed to invoke 'RequestDataOnSimObjectType(...)'.", ex));
-        this.parent.requestDataManager.Register(customRequestId, typeof(T), eRequestId);
+
+        this.parent.requestDataManager.RegisterStructRequest(requestId, type, typeId);
+
         logger.LogMethodEnd();
+        return requestId;
       }
 
-      public void RequestRepeatedly<T>(SimConnectPeriod period, bool sendOnlyOnChange = true,
+      public RequestId RequestRepeatedly<T>(
+        SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
       {
-        RequestRepeatedly<T>(out int _, period, sendOnlyOnChange, initialDelayFrames, skipBetweenFrames, numberOfReturnedFrames);
+        var ret = new RequestId(IdProvider.GetNextAsEnum());
+        RequestRepeatedly<T>(ret, period, sendOnlyOnChange, initialDelayFrames, skipBetweenFrames, numberOfReturnedFrames);
+        return ret;
       }
-
-      public void RequestRepeatedly<T>(out int requestId, SimConnectPeriod period, bool sendOnlyOnChange = true,
+      public void RequestRepeatedly<T>(RequestId requestId,
+        SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
       {
-        requestId = IdProvider.GetNext();
-        RequestRepeatedly<T>(requestId, period, sendOnlyOnChange,
-          initialDelayFrames, skipBetweenFrames, numberOfReturnedFrames);
+        var typeId = typeManager.GetByTypeSingle(typeof(T));
+        RequestRepeatedly(requestId, typeId, period, sendOnlyOnChange, initialDelayFrames, skipBetweenFrames, numberOfReturnedFrames);
+      }
+      public RequestId RequestRepeatedly(TypeId typeId,
+        SimConnectPeriod period, bool sendOnlyOnChange = true,
+        int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
+      {
+        var ret = new RequestId(IdProvider.GetNextAsEnum());
+        RequestRepeatedly(ret, typeId, period, sendOnlyOnChange, initialDelayFrames, skipBetweenFrames, numberOfReturnedFrames);
+        return ret;
       }
 
-      // TODO those functions are missing equivalents with "Type t" as param instead of generic param.
-      public void RequestRepeatedly<T>(
-        int? customRequestId, SimConnectPeriod period, bool sendOnlyOnChange = true,
+      public void RequestRepeatedly(RequestId requestId, TypeId typeId,
+        SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
       {
         logger.LogMethodStart(new object?[] {
-        customRequestId, period, sendOnlyOnChange, initialDelayFrames,
-        skipBetweenFrames, numberOfReturnedFrames });
+          requestId, period, sendOnlyOnChange, initialDelayFrames,
+          skipBetweenFrames, numberOfReturnedFrames });
         if (this.parent.simConnect == null) throw new NotConnectedException();
         if (initialDelayFrames < 0) initialDelayFrames = 0;
         if (skipBetweenFrames < 0) skipBetweenFrames = 0;
@@ -229,72 +237,111 @@ namespace ESimConnect
           ? SIMCONNECT_DATA_REQUEST_FLAG.CHANGED
           : SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT;
 
-        EEnum eTypeId = typeManager.GetIdAsEnum(typeof(T));
-        EEnum eRequestId = IdProvider.GetNextAsEnum();
+        Type type = typeManager.GetType(typeId);
+
         SIMCONNECT_PERIOD simConPeriod = EnumConverter.ConvertEnum2<SimConnectPeriod, SIMCONNECT_PERIOD>(period);
 
         parent.Try(() =>
           this.parent.simConnect.RequestDataOnSimObject(
-            eRequestId, eTypeId, SimConnect.SIMCONNECT_OBJECT_ID_USER, simConPeriod,
+            requestId.ToEEnum(), typeId.ToEEnum(), SimConnect.SIMCONNECT_OBJECT_ID_USER, simConPeriod,
             flag, (uint)initialDelayFrames, (uint)skipBetweenFrames, (uint)numberOfReturnedFrames),
           ex => new InternalException($"Failed to invoke 'RequestDataOnSimObject(...)'.", ex));
-        this.parent.requestDataManager.Register(customRequestId, typeof(T), eRequestId, simConPeriod);
+
+        this.parent.requestDataManager.RegisterStructRepeatedlyRequest(requestId, type, typeId, simConPeriod);
+
         logger.LogMethodEnd();
       }
 
-
-      public void Unregister<T>()
+      public void Unregister<T>(int? customDelayMs = null)
       {
-        Unregister(typeof(T));
+        logger.LogMethodStart();
+        var typeId = typeManager.GetByTypeSingle(typeof(T));
+
+        IEnumerable<Request> requestIds = parent.requestDataManager.GetAll()
+          .Where(q => q.TypeId != null && typeId == q.TypeId.Value);
+        UnregisterInternal(new List<TypeId>() { typeId }, requestIds, customDelayMs);
+        logger.LogMethodEnd();
       }
 
-      public void Unregister(Type t)
+      public void Unregister(TypeId typeId, int? customDelayMs = null)
+      {
+        logger.LogMethodStart();
+        IEnumerable<Request> requestIds = parent.requestDataManager.GetAll()
+          .Where(q => q.TypeId != null && typeId == q.TypeId.Value);
+        UnregisterInternal(new List<TypeId>() { typeId }, requestIds, customDelayMs);
+        logger.LogMethodEnd();
+      }
+
+      public void UnregisterAll(int? customDelayMs = null) //TODO rename variable
+      {
+        logger.LogMethodStart();
+        var typeIds = typeManager.GetAllTypeIds();
+        IEnumerable<Request> requestIds = parent.requestDataManager.GetAll()
+          .Where(q => q.TypeId != null && typeIds.Contains(q.TypeId.Value));
+        UnregisterInternal(typeIds, requestIds, customDelayMs);
+        logger.LogMethodEnd();
+      }
+
+      private void UnregisterInternal(IEnumerable<TypeId> typeIds, IEnumerable<Request> requests, int? customDelayMs)
       {
         logger.LogMethodStart();
         parent.EnsureConnected();
 
-        EEnum eTypeId = typeManager.GetIdAsEnum(t);
 
-        parent.Try(
-          () => this.parent.simConnect!.ClearDataDefinition(eTypeId),
-          ex => new InternalException($"Failed to unregister type {t.Name}.", ex));
-        this.typeManager.Unregister(t);
+        EAssert.IsTrue(requests.All(q => q.TypeId != null && typeIds.ToList().Contains(q.TypeId.Value)));
+
+        var periodicalRequests = requests.Where(q => q.Period != null);
+        if (periodicalRequests.Any())
+        {
+          foreach (var request in periodicalRequests)
+            this.RequestRepeatedly(request.RequestId, request.TypeId!.Value, SimConnectPeriod.NEVER);
+
+          customDelayMs ??= ESimConnect.CalculateSafetyUnregisterDelay(periodicalRequests.Select(q => q.Period));
+          Thread.Sleep(customDelayMs.Value); //TODO rewrite to following thread invocation after a while to be non-blocking
+        }
+
+        foreach (var typeId in typeIds)
+        {
+          parent.Try(
+          () => this.parent.simConnect!.ClearDataDefinition(typeId.ToEEnum()),
+          ex => new InternalException($"Failed to unregister typeId '{typeId}' / type '{typeManager[typeId].FullName}'.", ex));
+        }
+
+        foreach (var request in requests)
+          this.parent.requestDataManager.Unregister(request.RequestId);
+        foreach (var typeId in typeIds)
+          this.typeManager.Unregister(typeId);
+
         logger.LogMethodEnd();
-      }
-
-
-      //public void UnregisterSafely<T>()
-      //{
-      //  UnregisterSafely(typeof(T));
-      //}
-      //public void UnregisterSafely(Type t)
-      //{
-      //  logger.LogMethodStart(new object[] { t });
-      //  parent.EnsureConnected();
-
-      //  EEnum eTypeId = typeManager.GetIdAsEnum(t);
-      //  EEnum eRequestId = this.parent.requestDataManager.GetIdAsEnum(t);
-      //  parent.Try(
-      //    () =>
-      //    {
-      //      this.parent.simConnect!.RequestDataOnSimObject(
-      //        eRequestId, eTypeId, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER,
-      //        SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
-      //      Thread.Sleep(500);
-      //      Unregister
-      //    },
-      //    ex => new InternalException($"Failed to unregister type {t.Name} safely.", ex));
-
-      //  logger.LogMethodEnd();
-      //}
-
-      public void UnregisterAll()
-      {
-        var types = this.typeManager.GetRegisteredTypes();
-        types.ForEach(q => Unregister(q));
       }
     }
 
+
+    private static int CalculateSafetyUnregisterDelay(IEnumerable<SIMCONNECT_PERIOD> periods)
+    {
+      int ret = periods
+        .Select(q => CalculateSafetyUnregisterDelay(q))
+        .Select(q => (int?)q) // to return something when periods is empty 
+        .Max() ?? 0;
+      return ret;
+    }
+
+    private static int CalculateSafetyUnregisterDelay(SIMCONNECT_PERIOD period)
+    {
+      //TODO move this function somewhere else
+      int ret = period switch
+      {
+        SIMCONNECT_PERIOD.VISUAL_FRAME => 50, //TODO adjust value in more "scientific" way
+        SIMCONNECT_PERIOD.SIM_FRAME => 50,
+        SIMCONNECT_PERIOD.NEVER => 0,
+        SIMCONNECT_PERIOD.ONCE => 50,
+        SIMCONNECT_PERIOD.SECOND => 1250,
+        _ => throw new UnexpectedEnumValueException(period),
+      };
+      return ret;
+    }
+
+    //TODO refactor methods to be Register/Request/Unregister
     public class SystemEventsHandler : BaseHandler
     {
       private record EventIdName(EEnum EventId, string EventName);

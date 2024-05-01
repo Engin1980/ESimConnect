@@ -10,7 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Mock\" />
+    <Compile Remove="Mock\**" />
+    <EmbeddedResource Remove="Mock\**" />
+    <None Remove="Mock\**" />
+    <Page Remove="Mock\**" />
   </ItemGroup>
 
   <ItemGroup>
