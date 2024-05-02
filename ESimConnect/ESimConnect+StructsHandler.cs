@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using static ESimConnect.Types.RequestDataManager;
+using static ESimConnect.Types.RequestsManager;
 
 namespace ESimConnect
 {
-  public partial class ESimConnect
+    public partial class ESimConnect
   {
     public class StructsHandler : BaseHandler
     {
@@ -33,7 +33,7 @@ namespace ESimConnect
 
         foreach (var fieldInfo in fieldInfos)
         {
-          if (validate) parent.ValidateSimVarName(fieldInfo.Name);
+          if (validate) ValidateSimVarName(fieldInfo.Name);
           parent.Try(() =>
             this.parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(),
               fieldInfo.Name, fieldInfo.Unit, fieldInfo.Type,
@@ -129,29 +129,29 @@ namespace ESimConnect
         logger.LogMethodEnd();
       }
 
-      public void Unregister<T>(int? customDelayMs = null)
+      public void Unregister<T>(int? unergistrationDelayMs = null)
       {
         logger.LogMethodStart();
         var typeId = typeManager.GetByTypeSingle(typeof(T));
-        UnregisterInternal(new List<TypeId>() { typeId }, customDelayMs);
+        UnregisterInternal(new List<TypeId>() { typeId }, unergistrationDelayMs);
         logger.LogMethodEnd();
       }
 
-      public void Unregister(TypeId typeId, int? customDelayMs = null)
+      public void Unregister(TypeId typeId, int? unergistrationDelayMs = null)
       {
         logger.LogMethodStart();
-        UnregisterInternal(new List<TypeId>() { typeId }, customDelayMs);
+        UnregisterInternal(new List<TypeId>() { typeId }, unergistrationDelayMs);
         logger.LogMethodEnd();
       }
 
-      public void UnregisterAll(int? customDelayMs = null) //TODO rename variable
+      public void UnregisterAll(int? unergistrationDelayMs = null)
       {
         logger.LogMethodStart();
-        UnregisterInternal(typeManager.GetAllTypeIds().ToList(), customDelayMs);
+        UnregisterInternal(typeManager.GetAllTypeIds().ToList(), unergistrationDelayMs);
         logger.LogMethodEnd();
       }
 
-      private void UnregisterInternal(List<TypeId> typeIds, int? customDelayMs)
+      private void UnregisterInternal(List<TypeId> typeIds, int? unergistrationDelayMs)
       {
         logger.LogMethodStart();
         parent.EnsureConnected();
@@ -165,8 +165,8 @@ namespace ESimConnect
           foreach (var request in periodicalRequests)
             this.RequestRepeatedly(request.RequestId, request.TypeId, SimConnectPeriod.NEVER);
 
-          customDelayMs ??= ESimConnect.CalculateSafetyUnregisterDelay(periodicalRequests.Select(q => q.Period!.Value));
-          Thread.Sleep(customDelayMs.Value); //TODO rewrite to following thread invocation after a while to be non-blocking
+          unergistrationDelayMs ??= UnregistrationDelay.Get(periodicalRequests.Select(q => q.Period!.Value));
+          Thread.Sleep(unergistrationDelayMs.Value); //TODO rewrite to following thread invocation after a while to be non-blocking
         }
 
         foreach (var typeId in typeIds)

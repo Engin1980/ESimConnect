@@ -15,7 +15,7 @@ using System.Windows.Threading;
 
 namespace ESimConnect.Types
 {
-  public class WinHandleManager : IDisposable
+  internal class WinHandleManager : IDisposable
   {
     public delegate void ExceptionRaisedDelegate(Exception ex);
     public event ExceptionRaisedDelegate? ExceptionRaised;
@@ -78,8 +78,7 @@ namespace ESimConnect.Types
             else
             {
               string s = ExpandExceptionString(ex);
-              System.IO.File.WriteAllText("error.txt", s); //TODO remove when not used
-              ELogging.Logger.Log(this, ELogging.LogLevel.ERROR, "DefWndProc EXCEPTION " + s);
+              Logger.Log(this, LogLevel.ERROR, "DefWndProc EXCEPTION " + s);
               this.ExceptionRaised?.Invoke(ex);
             }
           }
@@ -89,17 +88,14 @@ namespace ESimConnect.Types
       return (IntPtr)0;
     }
 
-    private string ExpandExceptionString(Exception ex)
+    private static string ExpandExceptionString(Exception ex)
     {
       List<string> tmp = new();
       while (ex != null)
       {
         StringBuilder sb = new();
-        sb.Append(ex.Message);
         sb.Append("\n\t");
         sb.Append(ex.StackTrace ?? "");
-        tmp.Add(ex.ToString());
-        ex = ex.InnerException!;
       }
       string ret = string.Join("\n\n", tmp);
       return ret;

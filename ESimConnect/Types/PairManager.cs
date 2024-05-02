@@ -11,7 +11,7 @@ using System.Windows.Media.Animation;
 
 namespace ESimConnect.Types
 {
-  internal class TypeManager
+    internal class TypeManager
   {
     private readonly List<TypeDef> inner = new();
     public record TypeDef(TypeId TypeId, Type Type);
@@ -39,7 +39,7 @@ namespace ESimConnect.Types
     public TypeId GetByTypeSingle(Type type)
     {
       var tmp = GetByType(type);
-      if (tmp.Count() == 0)
+      if (!tmp.Any())
         throw new ESimConnectException($"There is not typeId associated with type '{type.FullName}'.");
       if (tmp.Count() > 1)
         throw new ESimConnectException($"There are multiple typeIds associated with type '{type.FullName}'. Try use exact typeId.");
@@ -58,7 +58,7 @@ namespace ESimConnect.Types
     public new void Register(EEnum id, string @event) => base.Register(id, @event);
 
     public string GetEvent(EEnum id) => base.TryGet(id)
-      .OrThrow(() => new InvalidRequestException($"Event with id {id} not registered."));
+      .OrThrow(() => new InvalidRequestException($"Event with id {id} not registered."))!;
 
     public EEnum GetId(string @event) => this.TryGet(@event)
       .OrThrow(() => new InvalidRequestException($"Event {@event} not registered."));
@@ -70,8 +70,8 @@ namespace ESimConnect.Types
   {
     public T? Value { get; private set; }
     public bool HasValue { get; private set; }
-    public static Optional<T> Of(T t) => new Optional<T>() { Value = t, HasValue = true };
-    public static Optional<T> Empty() => new Optional<T>() { Value = default(T), HasValue = false };
+    public static Optional<T> Of(T t) => new() { Value = t, HasValue = true };
+    public static Optional<T> Empty() => new() { Value = default, HasValue = false };
 
     internal T? OrThrow(Func<Exception> exceptionProducer)
     {
@@ -96,7 +96,7 @@ namespace ESimConnect.Types
       if (HasValue)
         return Value;
       else
-        return default(T);
+        return default;
     }
 
     private Optional() { }
@@ -125,8 +125,10 @@ namespace ESimConnect.Types
     protected List<Ta> GetAllAs() => inner.Select(q => q.a).ToList();
     protected void Register(Ta a, Tb b)
     {
-      if (a == null || b == null)
-        throw new ArgumentNullException("Any value cannot be null.");
+      if (a == null)
+        throw new ArgumentNullException(nameof(a));
+      if (b == null)
+        throw new ArgumentNullException(nameof(b));
       if (inner.Any(q => IsSame(q.a, a)))
         throw new InvalidRequestException(
           $"Unable to register {a}={b}. '{a}' already registered as '{TryGet(a)}'.");

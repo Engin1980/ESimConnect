@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace ESimConnect
 {
-  public partial class ESimConnect
+    public partial class ESimConnect
   {
     public class ClientEventsHandler : BaseHandler
     {

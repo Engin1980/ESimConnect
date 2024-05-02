@@ -7,8 +7,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ESimConnect.Types;
 
-namespace ESimConnect.Types
+namespace ESimConnect
 {
   internal class IdProvider
   {
@@ -48,18 +49,18 @@ namespace ESimConnect.Types
     public override readonly bool Equals([NotNullWhen(true)] object? obj)
     {
       if (obj is RequestId requestId)
-        return this.value == requestId.value;
+        return value == requestId.value;
       else
         return false;
     }
     public readonly override int GetHashCode()
     {
-      return this.value.GetHashCode();
+      return value.GetHashCode();
     }
-    public readonly override string ToString() => this.value.ToString();
+    public readonly override string ToString() => value.ToString();
 
-    internal readonly EEnum ToEEnum() => (EEnum)this.value;
-    public readonly int ToInt() => this.value;
+    internal readonly EEnum ToEEnum() => (EEnum)value;
+    public readonly int ToInt() => value;
   }
 
   public readonly struct EventId
@@ -83,18 +84,18 @@ namespace ESimConnect.Types
     public override readonly bool Equals([NotNullWhen(true)] object? obj)
     {
       if (obj is EventId requestId)
-        return this.value == requestId.value;
+        return value == requestId.value;
       else
         return false;
     }
     public readonly override int GetHashCode()
     {
-      return this.value.GetHashCode();
+      return value.GetHashCode();
     }
-    public readonly override string ToString() => this.value.ToString();
+    public readonly override string ToString() => value.ToString();
 
-    internal readonly EEnum ToEEnum() => (EEnum)this.value;
-    public readonly int ToInt() => this.value;
+    internal readonly EEnum ToEEnum() => (EEnum)value;
+    public readonly int ToInt() => value;
   }
 
   public readonly struct TypeId
@@ -117,17 +118,17 @@ namespace ESimConnect.Types
     public override readonly bool Equals([NotNullWhen(true)] object? obj)
     {
       if (obj is TypeId typeId)
-        return this.value == typeId.value;
+        return value == typeId.value;
       else
         return false;
     }
     public readonly override int GetHashCode()
     {
-      return this.value.GetHashCode();
+      return value.GetHashCode();
     }
-    public readonly override string ToString() => this.value.ToString();
+    public readonly override string ToString() => value.ToString();
 
-    internal readonly EEnum ToEEnum() => (EEnum)this.value;
-    public readonly int ToInt() => this.value;
+    internal readonly EEnum ToEEnum() => (EEnum)value;
+    public readonly int ToInt() => value;
   }
 }

@@ -20,7 +20,7 @@ using System.Windows.Media.TextFormatting;
 
 namespace ESimConnect
 {
-  public partial class ESimConnect : IDisposable
+    public partial class ESimConnect : IDisposable
   {
     #region Classes + Structs
 
@@ -68,7 +68,7 @@ namespace ESimConnect
       #endregion Constructors
     }
 
-    public class ESimConnectEventInvokedEventArgs //TODO rewrite to records
+    public class ESimConnectEventInvokedEventArgs
     {
       #region Properties
 
@@ -118,37 +118,12 @@ namespace ESimConnect
 
     #endregion Events
 
-
-    private static int CalculateSafetyUnregisterDelay(IEnumerable<SIMCONNECT_PERIOD> periods)
-    {
-      int ret = periods
-        .Select(q => CalculateSafetyUnregisterDelay(q))
-        .Select(q => (int?)q) // to return something when periods is empty 
-        .Max() ?? 0;
-      return ret;
-    }
-
-    private static int CalculateSafetyUnregisterDelay(SIMCONNECT_PERIOD period)
-    {
-      //TODO move this function somewhere else
-      int ret = period switch
-      {
-        SIMCONNECT_PERIOD.VISUAL_FRAME => 50, //TODO adjust value in more "scientific" way
-        SIMCONNECT_PERIOD.SIM_FRAME => 50,
-        SIMCONNECT_PERIOD.NEVER => 0,
-        SIMCONNECT_PERIOD.ONCE => 50,
-        SIMCONNECT_PERIOD.SECOND => 1250,
-        _ => throw new UnexpectedEnumValueException(period),
-      };
-      return ret;
-    }
-
     #region Fields
 
     // private const uint SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_CHANGED = 0x00000001; // TODO delete if not used
     // private const uint SIMCONNECT_CLIENTDATAOFFSET_AUTO = uint.MaxValue;
     // private const uint SIMCONNECT_GROUP_PRIORITY_HIGHEST = 1;
-    private readonly RequestDataManager requestDataManager = new();
+    private readonly RequestsManager requestDataManager = new();
     private readonly RequestExceptionManager requestExceptionManager = new();
     private readonly StructsHandler _Structs;
     private readonly SystemEventsHandler _SystemEvents;
@@ -349,7 +324,7 @@ namespace ESimConnect
       return ret;
     }
 
-    private void ValidateSimVarName(string simVarName)
+    private static void ValidateSimVarName(string simVarName)
     {
       string unindexSimVarName(string simVarName)
       {

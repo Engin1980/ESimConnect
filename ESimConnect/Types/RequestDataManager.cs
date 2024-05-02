@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ESimConnect.Types
 {
-  internal class RequestDataManager
+  internal class RequestsManager
   {
     public enum KindOfTypeId
     {
@@ -20,20 +20,24 @@ namespace ESimConnect.Types
 
     public record Request(RequestId RequestId, Type Type, TypeId TypeId, KindOfTypeId Kind, SIMCONNECT_PERIOD? Period);
 
-    private readonly List<Request> inner = new(); // rewrite to dict for speed
+    private readonly List<Request> inner = new(); //TODO rewrite to dict for speed
 
     private void Register(Request request)
     {
       EAssert.Argument.IsNotNull(request, nameof(request));
+      Request? itemToRemove = null;
 
       if (request.Period != null)
       {
         // used when period is reset to another value for same request/type
+        // cannot be removed directly due to thread-safety
+        // at least one record must be kept everytime, so firstly add new, then remove old
         var existing = inner.SingleOrDefault(q => q.RequestId == request.RequestId && q.Period != null);
         if (existing != null)
         {
-          EAssert.IsTrue(request.TypeId == existing.TypeId); //TODO how do this for values???
-          inner.Remove(existing);
+          EAssert.IsTrue(request.TypeId == existing.TypeId);
+          EAssert.IsTrue(request.Type == existing.Type);
+          itemToRemove = existing;
         }
       }
       else
@@ -43,6 +47,7 @@ namespace ESimConnect.Types
       }
 
       inner.Add(request);
+      if (itemToRemove != null) inner.Remove(itemToRemove);
     }
 
     public void RegisterRequest(RequestId requestId, Type type, TypeId typeId, KindOfTypeId kind)
@@ -59,30 +64,8 @@ namespace ESimConnect.Types
       inner.Remove(item);
     }
 
-    //public void Recall(EEnum requestId, out Type type, out int? customId)
-    //{
-    //  RequestItem rd = inner.Single(q => q.requestId == requestId);
-    //  type = rd.type;
-    //  customId = rd.customId;
-    //}
-
-    //internal EEnum GetIdAsEnum(int? customId, Type t)
-    //{
-    //  var matches = this.inner.Where(q => q.type == t && q.customId == customId);
-    //  if (matches.Count() > 1)
-    //    throw new InvalidRequestException(
-    //      $"Type '{t.Name}' is defined more than once. 'customId' is needed.");
-    //  return matches.Single().requestId;
-    //}
-
-    //internal EEnum GetIdAsEnum(Type t)
-    //{
-    //  return GetIdAsEnum(null, t);
-    //}
-
-    internal IEnumerable<Request> GetByTypeId(KindOfTypeId kind, TypeId typeId) => inner.Where((Func<Request, bool>)(q => q.Kind == kind && q.TypeId == typeId));
+    internal IEnumerable<Request> GetByTypeId(KindOfTypeId kind, TypeId typeId) => inner.Where(q => q.Kind == kind && q.TypeId == typeId);
     internal Request GetByRequestId(RequestId requestId) => this.inner.Single(q => q.RequestId == requestId);
-
     internal IEnumerable<Request> GetAll() => this.inner.ToList();
   }
 }

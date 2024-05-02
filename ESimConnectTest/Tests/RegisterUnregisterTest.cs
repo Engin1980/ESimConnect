@@ -1,4 +1,4 @@
-﻿using ESimConnect.Types;
+﻿using ESimConnect;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using static ESimConnectTest.SharedFunctions;
 
 namespace ESimConnectTest.Tests
 {
-  internal class RegisterUnregisterTest
+    internal class RegisterUnregisterTest
   {
     private static readonly string[] simVars =
     {
@@ -26,7 +26,7 @@ namespace ESimConnectTest.Tests
     private static readonly List<string> unregistered = new();
     private static readonly List<RC> registered = new();
     private static readonly ESimConnect.ESimConnect simCon = new();
-    private record RC(TypeId typeId, string simVar);
+    private record RC(TypeId TypeId, string SimVar);
 
     internal static void Run()
     {
@@ -86,10 +86,10 @@ namespace ESimConnectTest.Tests
 
     private static void Unregister(RC rc)
     {
-      Console.WriteLine("Unregistering " + rc.simVar);
-      simCon.Values.Unregister(rc.typeId, SAFETY_DELAY_MS);
+      Console.WriteLine("Unregistering " + rc.SimVar);
+      simCon.Values.Unregister(rc.TypeId, SAFETY_DELAY_MS);
       registered.Remove(rc);
-      unregistered.Add(rc.simVar);
+      unregistered.Add(rc.SimVar);
     }
 
     private static void Register(string simVar)

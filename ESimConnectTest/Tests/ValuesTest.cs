@@ -1,5 +1,4 @@
 ﻿using ESimConnect;
-using ESimConnect.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +12,7 @@ using static ESimConnectTest.SharedFunctions;
 
 namespace ESimConnectTest.Tests
 {
-  internal class ValuesTest
+    internal class ValuesTest
   {
     private static readonly ESimConnect.ESimConnect eSimCon = new();
     private static readonly string[] simVars = new string[]

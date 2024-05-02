@@ -3,29 +3,30 @@ using System.Windows.Threading;
 using ELogging;
 using System.Runtime.CompilerServices;
 
+bool useLogging = true;
 string LOG_FILE_NAME = "_log.txt";
 SetUpLogging();
+
+useLogging = true;
 
 //ValuesTest.Run();
 //StructsTest.Run();
 //ClientEventsTest.Run();
 //SystemEventsTest.Run();
+
+useLogging = false;
+
 RegisterUnregisterTest.Run();
-
-//TODO test mixing of primitive and type requests - I think that every request will have its custom
-//  request counter, so when received, there will be conflict to distinquish, which 
-//  data has been received (when invoked out of ESimConnect via only one event
-
 
 void SetUpLogging()
 {
-  return; 
   if (File.Exists(LOG_FILE_NAME))
     File.Delete(LOG_FILE_NAME);
 
   Logger.RegisterLogAction(q =>
   {
-    string s = $"{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss-fff")}  {q.Sender,-25}  {q.Message}\n";
+    if (!useLogging) return;
+    string s = $"{DateTime.Now:yyyy-MM-dd-HH-mm-ss-fff}  {q.Sender,-25}  {q.Message}\n";
     File.AppendAllText(LOG_FILE_NAME, s);
   },
   new List<LogRule>() { new(".+", LogLevel.TRACE) });

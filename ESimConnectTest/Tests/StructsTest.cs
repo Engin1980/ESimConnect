@@ -1,6 +1,5 @@
 ﻿using ESimConnect;
 using ESimConnect.Definitions;
-using ESimConnect.Types;
 using ESystem.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ using static ESimConnectTest.SharedFunctions;
 
 namespace ESimConnectTest.Tests
 {
-  internal class StructsTest
+    internal class StructsTest
   {
     private static readonly Dictionary<RequestId, Type> requests = new();
     private static readonly ESimConnect.ESimConnect eSimCon = new();

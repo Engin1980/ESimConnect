@@ -10,15 +10,15 @@ using System.Threading.Tasks;
 
 namespace ESimConnect.Types
 {
-    internal static class SanityHelpers
+  internal static class SanityHelpers
   {
     private readonly static Dictionary<Type, SIMCONNECT_DATATYPE> typeMapping;
     private readonly static Dictionary<int, SIMCONNECT_DATATYPE> typeStringMapping;
 
     public class FieldMapInfo
     {
-      public FieldInfo Field { get; set; }
-      public string Name { get; set; }
+      public FieldInfo Field { get; set; } = null!;
+      public string Name { get; set; } = null!;
       public string? Unit { get; set; }
       public SIMCONNECT_DATATYPE Type { get; set; }
     }

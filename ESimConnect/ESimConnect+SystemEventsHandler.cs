@@ -1,5 +1,4 @@
 ﻿using ESimConnect.Enumerations;
-using ESimConnect.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Reflection;
 
 namespace ESimConnect
 {
-  public partial class ESimConnect
+    public partial class ESimConnect
   {
     public class SystemEventsHandler : BaseHandler
     {
