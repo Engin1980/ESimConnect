@@ -63,7 +63,7 @@ namespace ESimConnect
 
         RequestId requestId = RequestId.Next();
         Type type = typeManager[typeId];
-        SIMCONNECT_SIMOBJECT_TYPE simConObjectType = EnumConverter.ConvertEnum2<SimConnectSimObjectType, SIMCONNECT_SIMOBJECT_TYPE>(simObjectType);
+        SIMCONNECT_SIMOBJECT_TYPE simConObjectType = EnumConverter.Convert<SimConnectSimObjectType, SIMCONNECT_SIMOBJECT_TYPE>(simObjectType);
 
         parent.Try(() => this.parent.simConnect!.RequestDataOnSimObjectType(requestId.ToEEnum(), typeId.ToEEnum(), radius, simConObjectType),
           ex => throw new InternalException("Failed to invoke 'RequestDataOnSimObjectType(...)'.", ex));
@@ -116,7 +116,7 @@ namespace ESimConnect
 
         Type type = typeManager[typeId];
 
-        SIMCONNECT_PERIOD simConPeriod = EnumConverter.ConvertEnum2<SimConnectPeriod, SIMCONNECT_PERIOD>(period);
+        SIMCONNECT_PERIOD simConPeriod = EnumConverter.Convert<SimConnectPeriod, SIMCONNECT_PERIOD>(period);
 
         parent.Try(() =>
           this.parent.simConnect.RequestDataOnSimObject(

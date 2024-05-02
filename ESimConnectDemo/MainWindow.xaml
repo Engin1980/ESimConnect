@@ -1,0 +1,54 @@
+﻿<Window x:Class="ESimConnectDemo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ex="clr-namespace:ESimConnect;assembly=ESimConnect"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <Button x:Name="btnConnectDisconnect" Content="Connect / Disconnect" Click="btnConnectDisconnect_Click" DockPanel.Dock="Left" Padding="8" />
+            <Label Content="{Binding ConnectionStatus}" />
+        </DockPanel>
+        <TabControl>
+            <TabItem Header="Value (SimVars)">
+                <DockPanel>
+                    <DockPanel DockPanel.Dock="Top">
+                        <Label DockPanel.Dock="Left" Content="SimVar Name:"/>
+                        <Button x:Name="btnValueSimVarAdd" Content="Add" Click="btnValueSimVarAdd_Click" DockPanel.Dock="Right" Padding="8 0 8 0" />
+                        <TextBox x:Name="txtValueSimVar" />
+                    </DockPanel>
+                    <DataGrid ItemsSource="{Binding Values}" AutoGenerateColumns="False" CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn IsReadOnly="True" Header="SimVar Name" Binding="{Binding Name}" />
+                            <DataGridTextColumn IsReadOnly="True" Header="Value" Binding="{Binding Value}" />
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.Header>
+                                    <Label Content="Periods" />
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox x:Name="cmbSelectedPeriod" ItemsSource="{Binding Periods}" SelectedItem="{Binding Period, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  Tag="{Binding RequestId}">
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridCheckBoxColumn x:Name="chkOnlyChange" Header="Only changes" Binding="{Binding OnlyOnChange, UpdateSourceTrigger=PropertyChanged}"  />
+                            <DataGridTextColumn Header="Skip" Binding="{Binding FrameSkip, UpdateSourceTrigger=PropertyChanged}" />
+                            <DataGridTextColumn IsReadOnly="True" Header="Last update" Binding="{Binding LastUpdateInterval}" />
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Tag="{Binding}" Content="(Delete)" x:Name="btnValueDelete" Click="btnValueDelete_Click" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

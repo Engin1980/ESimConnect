@@ -26,7 +26,7 @@ namespace ESimConnect
         logger.LogMethodStart();
         parent.EnsureConnected();
 
-        SIMCONNECT_DATATYPE simType = EnumConverter.ConvertEnum2<SimConnectSimTypeName, SIMCONNECT_DATATYPE>(simTypeName);
+        SIMCONNECT_DATATYPE simType = EnumConverter.Convert<SimConnectSimTypeName, SIMCONNECT_DATATYPE>(simTypeName);
 
         TypeId typeId = TypeId.Next();
 
@@ -51,7 +51,7 @@ namespace ESimConnect
         logger.LogMethodStart(new object?[] { typeId, radius, simObjectType });
         parent.EnsureConnected();
 
-        SIMCONNECT_SIMOBJECT_TYPE sst = EnumConverter.ConvertEnum2<SimConnectSimObjectType, SIMCONNECT_SIMOBJECT_TYPE>(simObjectType);
+        SIMCONNECT_SIMOBJECT_TYPE sst = EnumConverter.Convert<SimConnectSimObjectType, SIMCONNECT_SIMOBJECT_TYPE>(simObjectType);
 
         Type t = typeManager[typeId];
         RequestId requestId = RequestId.Next();
@@ -87,7 +87,7 @@ namespace ESimConnect
 
         Type type = this.typeManager[typeId];
 
-        SIMCONNECT_PERIOD simPeriod = EnumConverter.ConvertEnum2<SimConnectPeriod, SIMCONNECT_PERIOD>(period);
+        SIMCONNECT_PERIOD simPeriod = EnumConverter.Convert<SimConnectPeriod, SIMCONNECT_PERIOD>(period);
 
         parent.Try(() =>
           parent.simConnect.RequestDataOnSimObject(

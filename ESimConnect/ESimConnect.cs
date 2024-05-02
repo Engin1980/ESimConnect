@@ -212,7 +212,7 @@ namespace ESimConnect
         this.simConnect.OnRecvEvent += SimConnect_OnRecvEvent;
         this.winHandleManager.SimConnect = this.simConnect;
       },
-        ex => new InternalException("Unable to open connection to FS2020.", ex));
+        ex => new ESimConnectException("Unable to open connection to FS2020.", ex));
 
       logger.LogMethodEnd();
     }
@@ -253,7 +253,7 @@ namespace ESimConnect
     {
       logger.LogObject("Event " + nameof(SimConnect_OnRecvException), data);
       SIMCONNECT_EXCEPTION ex = (SIMCONNECT_EXCEPTION)data.dwException;
-      SimConnectException simConnectExceptionType = EnumConverter.ConvertEnum2<SIMCONNECT_EXCEPTION, SimConnectException>(ex);
+      SimConnectException simConnectExceptionType = EnumConverter.Convert<SIMCONNECT_EXCEPTION, SimConnectException>(ex);
       ThrowsException?.Invoke(this, simConnectExceptionType);
     }
 

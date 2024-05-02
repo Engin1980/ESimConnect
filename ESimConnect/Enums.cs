@@ -83,7 +83,15 @@ namespace ESimConnect
   public enum SimConnectPeriod
   {
     NEVER,
-    ONCE,
+    /// <summary>
+    /// Invoke once
+    /// </summary>
+    /// <remarks>
+    /// This also causes the type/request is unregistered from repeating read-outs, causing SimConnect exceptions "ID UNRECOGNIZED".
+    /// Therefore, users should use simple data request function instead of repetition-requests with ONCE parameter.
+    /// Therefore, commented.
+    /// </remarks>
+    /// ONCE,
     VISUAL_FRAME,
     SIM_FRAME,
     SECOND
@@ -91,26 +99,7 @@ namespace ESimConnect
 
   public class EnumConverter
   {
-    public static TTargetEnum ConvertEnum<TSourceEnum, TTargetEnum>(TSourceEnum sourceEnum)
-        where TSourceEnum : Enum
-        where TTargetEnum : Enum
-    {
-      // Get the name (key) of the source enum
-      string sourceName = sourceEnum.ToString();
-
-      // Check if the target enum contains a matching name
-      if (Enum.IsDefined(typeof(TTargetEnum), sourceName))
-      {
-        // If it does, convert the name to the target enum type
-        return (TTargetEnum)Enum.Parse(typeof(TTargetEnum), sourceName);
-      }
-      else
-      {
-        throw new ArgumentException($"No matching key found in target enum for key '{sourceName}'.");
-      }
-    }
-
-    public static TTargetEnum ConvertEnum2<TSourceEnum, TTargetEnum>(TSourceEnum sourceEnum)
+    public static TTargetEnum Convert<TSourceEnum, TTargetEnum>(TSourceEnum sourceEnum)
         where TSourceEnum : Enum
         where TTargetEnum : Enum
     {
@@ -138,7 +127,7 @@ namespace ESimConnect
       }
 
       // Convert the matching field to the target enum
-      return (TTargetEnum)matchingTargetField.GetValue(null);
+      return (TTargetEnum)matchingTargetField.GetValue(null)!;
     }
 
     public static TEnum ParseEnum<TEnum>(string value, bool ignoreCase = true) where TEnum : Enum
