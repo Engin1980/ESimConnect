@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ESimConnect.Types;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace ESimConnectTest.Tests
     {
         private static readonly ESimConnect.ESimConnect eSimCon = new();
         private static readonly string[] eventNames = new string[] { "Paused", "Unpaused" };
-        private static readonly Dictionary<int, string> xx = new();
+        private static readonly Dictionary<EventId, string> registeredEvents = new();
         private static readonly object lck = new();
 
         internal static void Run()
@@ -40,8 +41,8 @@ namespace ESimConnectTest.Tests
             foreach (string eventName in eventNames)
             {
                 Console.WriteLine("\t" + eventName);
-                eSimCon.SystemEvents.Register(eventName, out int eid);
-                xx[eid] = eventName;
+                EventId eid = eSimCon.SystemEvents.Register(eventName);
+                registeredEvents[eid] = eventName;
             }
         }
 
@@ -56,10 +57,10 @@ namespace ESimConnectTest.Tests
 
         private static void ESimCon_EventInvoked(ESimConnect.ESimConnect _, ESimConnectEventInvokedEventArgs e)
         {
-            if (xx.TryGetValue(e.RequestId, out string? registeredEventName) == false)
+            if (registeredEvents.TryGetValue(e.EventId, out string? registeredEventName) == false)
                 registeredEventName = "??-unknown-event-requestId--??";
 
-            Console.WriteLine($"ESimCon - Event invoked - event={e.Event}, requestId={e.RequestId}, registered-event={registeredEventName}, value={e.Value}");
+            Console.WriteLine($"ESimCon - Event invoked - event={e.Event}, eventId={e.EventId}, registered-event={registeredEventName}, value={e.Value}");
             lock (lck)
             {
                 Monitor.Pulse(lck);

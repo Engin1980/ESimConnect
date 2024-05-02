@@ -12,7 +12,13 @@ namespace ESimConnect.Types
 {
   internal class RequestDataManager
   {
-    public record Request(RequestId RequestId, Type Type, TypeId? TypeId, SIMCONNECT_PERIOD? Period);
+    public enum KindOfTypeId
+    {
+      STRUCT,
+      VALUE
+    }
+
+    public record Request(RequestId RequestId, Type Type, TypeId TypeId, KindOfTypeId Kind, SIMCONNECT_PERIOD? Period);
 
     private readonly List<Request> inner = new(); // rewrite to dict for speed
 
@@ -39,11 +45,11 @@ namespace ESimConnect.Types
       inner.Add(request);
     }
 
-    public void RegisterStructRequest(RequestId requestId, Type type, TypeId typeId)
-      => Register(new(requestId, type, typeId, null));
+    public void RegisterRequest(RequestId requestId, Type type, TypeId typeId, KindOfTypeId kind)
+      => Register(new(requestId, type, typeId, kind, null));
 
-    public void RegisterStructRepeatedlyRequest(RequestId requestId, Type type, TypeId typeId, SIMCONNECT_PERIOD period)
-      => Register(new(requestId, type, typeId, period));
+    public void RegisterRepeatedlyRequest(RequestId requestId, Type type, TypeId typeId, KindOfTypeId kind, SIMCONNECT_PERIOD period)
+      => Register(new(requestId, type, typeId, kind, period));
 
 
     public void Unregister(RequestId requestId)
@@ -74,7 +80,7 @@ namespace ESimConnect.Types
     //  return GetIdAsEnum(null, t);
     //}
 
-    internal IEnumerable<Request> GetByTypeId(TypeId typeId) => inner.Where((Func<Request, bool>)(q => q.typeId == typeId));
+    internal IEnumerable<Request> GetByTypeId(KindOfTypeId kind, TypeId typeId) => inner.Where((Func<Request, bool>)(q => q.Kind == kind && q.TypeId == typeId));
     internal Request GetByRequestId(RequestId requestId) => this.inner.Single(q => q.RequestId == requestId);
 
     internal IEnumerable<Request> GetAll() => this.inner.ToList();

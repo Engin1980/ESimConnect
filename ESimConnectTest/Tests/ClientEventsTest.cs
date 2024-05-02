@@ -39,14 +39,13 @@ namespace ESimConnectTest.Tests
         {
             eventOneParamValue = (eventOneParamValue + 1) % 2;
             Console.WriteLine("Invoking one-param event " + eventOneParamName + " with value " + eventOneParamValue);
-            eSimCon.ClientEvents.Invoke(eventOneParamName, new uint[] { (uint)eventOneParamValue });
+            eSimCon.ClientEvents.Invoke(eventOneParamName, (uint)eventOneParamValue);
         }
 
         private static void InvokeNoParamsEvent()
         {
             Console.WriteLine("Invoking no-params event " + eventNoParamsName);
             eSimCon.ClientEvents.Invoke(eventNoParamsName);
-
         }
     }
 }

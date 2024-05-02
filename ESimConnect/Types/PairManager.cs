@@ -10,34 +10,43 @@ using System.Windows.Media.Animation;
 
 namespace ESimConnect.Types
 {
-  internal class PrimitiveManager
-  {
-    private readonly Dictionary<int, Type> inner = new();
+  //internal class PrimitiveManager
+  //{
+  //  private readonly Dictionary<TypeId, Type> inner = new();
 
-    public void Register(int id, Type type)
-    {
-      if (inner.ContainsKey(id))
-        throw new ApplicationException("Duplicit ID int Primitive manager.");
-      this.inner[id] = type;
-    }
+  //  public void Register(TypeId id, Type type)
+  //  {
+  //    if (inner.ContainsKey(id))
+  //      throw new ApplicationException("Duplicit ID int Primitive manager.");
+  //    this.inner[id] = type;
+  //  }
 
-    public Type GetType(int id) { return inner[id]; }
+  //  public Type this[TypeId typeId]
+  //  {
+  //    get
+  //    {
+  //      if (inner.TryGetValue(typeId, out Type? ret) == false)
+  //        throw new ESimConnectException($"Unable to find registered value-type for typeId='{typeId}'.");
+  //      return ret!;
+  //    }
+  //  }
 
-    internal void Unregister(int typeId)
-    {
-      this.inner.Remove(typeId);
-    }
 
-    internal bool IsRegistered(int id)
-    {
-      return inner.ContainsKey(id);
-    }
+  //  internal void Unregister(TypeId typeId)
+  //  {
+  //    this.inner.Remove(typeId);
+  //  }
 
-    internal List<int> GetRegisteredTypesIds()
-    {
-      return inner.Keys.ToList();
-    }
-  }
+  //  internal bool IsRegistered(TypeId typeId)
+  //  {
+  //    return inner.ContainsKey(typeId);
+  //  }
+
+  //  internal List<TypeId> GetRegisteredTypesIds()
+  //  {
+  //    return inner.Keys.ToList();
+  //  }
+  //}
 
   internal class TypeManager
   {

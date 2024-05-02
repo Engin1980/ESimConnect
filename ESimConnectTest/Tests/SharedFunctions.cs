@@ -61,7 +61,7 @@ namespace ESimConnectTest
 
     internal static void ESimCon_EventInvoked(ESimConnect.ESimConnect _, ESimConnect.ESimConnect.ESimConnectEventInvokedEventArgs e)
     {
-      Console.WriteLine($"ESimCon - Event invoked - event={e.Event}, requestId={e.RequestId}, value={e.Value}");
+      Console.WriteLine($"ESimCon - Event invoked - event={e.Event}, eventId={e.EventId}, value={e.Value}");
     }
 
     internal static void ESimCon_Connected(ESimConnect.ESimConnect _)

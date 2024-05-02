@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ESimConnect.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -25,7 +26,7 @@ namespace ESimConnectTest.Tests
     private static readonly List<string> unregistered = new();
     private static readonly List<RC> registered = new();
     private static readonly ESimConnect.ESimConnect simCon = new();
-    private record RC(int typeId, string simVar);
+    private record RC(TypeId typeId, string simVar);
 
     internal static void Run()
     {
@@ -86,7 +87,7 @@ namespace ESimConnectTest.Tests
     private static void Unregister(RC rc)
     {
       Console.WriteLine("Unregistering " + rc.simVar);
-      simCon.Values.UnregisterSafely(rc.typeId, SAFETY_DELAY_MS);
+      simCon.Values.Unregister(rc.typeId, SAFETY_DELAY_MS);
       registered.Remove(rc);
       unregistered.Add(rc.simVar);
     }
@@ -94,9 +95,9 @@ namespace ESimConnectTest.Tests
     private static void Register(string simVar)
     {
       Console.WriteLine("Registering " + simVar);
-      int typeId = simCon.Values.Register<double>(simVar);
+      TypeId typeId = simCon.Values.Register<double>(simVar);
       Thread.Sleep(100);
-      simCon.Values.RequestRepeatedly(typeId, out int rid, ESimConnect.SimConnectPeriod.SIM_FRAME);
+      RequestId _ = simCon.Values.RequestRepeatedly(typeId, ESimConnect.SimConnectPeriod.SIM_FRAME);
       RC rc = new(typeId, simVar);
 
       unregistered.Remove(simVar);
