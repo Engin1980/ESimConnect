@@ -1,4 +1,5 @@
-﻿using ESystem.Asserting;
+﻿using ESystem;
+using ESystem.Asserting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,44 +11,6 @@ using System.Windows.Media.Animation;
 
 namespace ESimConnect.Types
 {
-  //internal class PrimitiveManager
-  //{
-  //  private readonly Dictionary<TypeId, Type> inner = new();
-
-  //  public void Register(TypeId id, Type type)
-  //  {
-  //    if (inner.ContainsKey(id))
-  //      throw new ApplicationException("Duplicit ID int Primitive manager.");
-  //    this.inner[id] = type;
-  //  }
-
-  //  public Type this[TypeId typeId]
-  //  {
-  //    get
-  //    {
-  //      if (inner.TryGetValue(typeId, out Type? ret) == false)
-  //        throw new ESimConnectException($"Unable to find registered value-type for typeId='{typeId}'.");
-  //      return ret!;
-  //    }
-  //  }
-
-
-  //  internal void Unregister(TypeId typeId)
-  //  {
-  //    this.inner.Remove(typeId);
-  //  }
-
-  //  internal bool IsRegistered(TypeId typeId)
-  //  {
-  //    return inner.ContainsKey(typeId);
-  //  }
-
-  //  internal List<TypeId> GetRegisteredTypesIds()
-  //  {
-  //    return inner.Keys.ToList();
-  //  }
-  //}
-
   internal class TypeManager
   {
     private readonly List<TypeDef> inner = new();
@@ -57,7 +20,7 @@ namespace ESimConnect.Types
     {
       EAssert.Argument.IsNotNull(typeId, nameof(typeId));
       EAssert.Argument.IsNotNull(type, nameof(type));
-      EAssert.IsTrue(inner.Any(q => q.TypeId == typeId));
+      EAssert.IsTrue(inner.None(q => q.TypeId == typeId));
       inner.Add(new(typeId, type));
     }
 

@@ -70,7 +70,7 @@ namespace ESimConnectTest.Tests
       DeleteA();
       Sleep(10000);
       Close(eSimCon);
-      Sleep(1000);
+      Sleep(2000);
       Console.WriteLine("Done");
     }
 

@@ -64,6 +64,15 @@ namespace ESimConnect
       public RequestId RequestRepeatedly(TypeId typeId, SimConnectPeriod period, bool sendOnlyOnChange = true,
         int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
       {
+        RequestId requestId = RequestId.Next();
+        RequestRepeatedly(requestId, typeId, period, sendOnlyOnChange, initialDelayFrames, skipBetweenFrames, numberOfReturnedFrames);
+        return requestId;
+      }
+
+      public void RequestRepeatedly(RequestId requestId, TypeId typeId,
+        SimConnectPeriod period, bool sendOnlyOnChange = true,
+        int initialDelayFrames = 0, int skipBetweenFrames = 0, int numberOfReturnedFrames = 0)
+      {
         logger.LogMethodStart(new object?[] {
           typeId, period, sendOnlyOnChange, initialDelayFrames,
           skipBetweenFrames, numberOfReturnedFrames });
@@ -77,7 +86,6 @@ namespace ESimConnect
           : SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT;
 
         Type type = this.typeManager[typeId];
-        RequestId requestId = RequestId.Next();
 
         SIMCONNECT_PERIOD simPeriod = EnumConverter.ConvertEnum2<SimConnectPeriod, SIMCONNECT_PERIOD>(period);
 
@@ -89,7 +97,6 @@ namespace ESimConnect
         parent.requestDataManager.RegisterRepeatedlyRequest(requestId, type, typeId, KindOfTypeId.VALUE, simPeriod);
 
         logger.LogMethodEnd();
-        return requestId;
       }
 
 
@@ -123,13 +130,13 @@ namespace ESimConnect
         parent.EnsureConnected();
 
         IEnumerable<Request> requests = parent.requestDataManager.GetAll()
-          .Where(q => q.Kind == KindOfTypeId.VALUE && typeIds.Contains(q.TypeId)); 
+          .Where(q => q.Kind == KindOfTypeId.VALUE && typeIds.Contains(q.TypeId));
 
         var periodicalRequests = requests.Where(q => q.Period != null);
         if (periodicalRequests.Any())
         {
           foreach (var request in periodicalRequests)
-            this.RequestRepeatedly(request.TypeId, SimConnectPeriod.NEVER);
+            this.RequestRepeatedly(request.RequestId, request.TypeId, SimConnectPeriod.NEVER);
 
           customDelayMs ??= ESimConnect.CalculateSafetyUnregisterDelay(periodicalRequests.Select(q => q.Period!.Value));
           Thread.Sleep(customDelayMs.Value); //TODO rewrite to following thread invocation after a while to be non-blocking

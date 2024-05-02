@@ -13,7 +13,7 @@ namespace ESimConnect.Types
   internal class IdProvider
   {
     private static int nextId = 1;
-    private static readonly SpinLock spinLock = new();
+    private static SpinLock spinLock = new(); // cannot be read-only !
     public static int Next()
     {
       int ret;

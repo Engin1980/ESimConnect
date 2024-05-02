@@ -20,7 +20,7 @@ namespace ESimConnectTest.Tests
     {
       "PLANE LATITUDE",
       "PLANE LONGITUDE",
-      "PLANE ALTITUDE"
+      "PLANE ALTITUDE",
     };
     private static readonly Dictionary<string, TypeId> simVarIds = new();
     private static readonly Dictionary<RequestId, string> onceRequestId = new();
@@ -52,8 +52,8 @@ namespace ESimConnectTest.Tests
       {
         if (simVars[0] == simVar) continue;
         if (simVars.Last() == simVar) continue;
-        Console.WriteLine("\t" + simVars[0]);
-        TypeId typeId = simVarIds[simVars[0]];
+        Console.WriteLine("\t" + simVar);
+        TypeId typeId = simVarIds[simVar];
         eSimCon.Values.Unregister(typeId);
       }
     }

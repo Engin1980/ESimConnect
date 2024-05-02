@@ -85,7 +85,9 @@ namespace ESimConnect
 
       public void UnregisterAll()
       {
-        this.registeredEvents.ForEach(q => this.Unregister(q.EventId));
+        this.registeredEvents
+          .ToList()
+          .ForEach(q => this.Unregister(q.EventId));
       }
 
       internal string GetEventNameByEventId(EventId eventId)

@@ -29,7 +29,7 @@ namespace ESimConnect.Types
       if (request.Period != null)
       {
         // used when period is reset to another value for same request/type
-        var existing = inner.Single(q => q.RequestId == request.RequestId && q.Period != null);
+        var existing = inner.SingleOrDefault(q => q.RequestId == request.RequestId && q.Period != null);
         if (existing != null)
         {
           EAssert.IsTrue(request.TypeId == existing.TypeId); //TODO how do this for values???
