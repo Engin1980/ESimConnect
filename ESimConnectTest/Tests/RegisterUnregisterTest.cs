@@ -43,7 +43,8 @@ namespace ESimConnectTest.Tests
         MakeChange();
       }
       UnregisterAll();
-      Sleep(1000);
+      Sleep(2000);
+      Close(simCon);
       Console.WriteLine("Done");
     }
 
