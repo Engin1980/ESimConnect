@@ -37,7 +37,7 @@ TODO
 
 Thanks to [RandFailuresFS2020](https://github.com/kanaron/RandFailuresFS2020) original repo for being an initial motivation and a study source.
 
-Thanks to [George Barlow](https://github.com/GeorgeBarlow) for his help to resolve unregistering issues.
+Thanks to [George Barlow](https://github.com/GeorgeBarlow) for his help with resolving unregistering issues.
 
 ## Contact
 
