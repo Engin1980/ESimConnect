@@ -16,7 +16,7 @@ namespace ESimConnectTest
     }
     internal static void Open(ESimConnect.ESimConnect eSimCon,
       ESimConnect.ESimConnect.ESimConnectDelegate connectDelegate,
-      ESimConnect.ESimConnect.ESimConnectEventInvokedDelegate eventDelegate,
+      ESimConnect.ESimConnect.ESimConnectSystemEventInvokedDelegate eventDelegate,
       ESimConnect.ESimConnect.ESimConnectDataReceivedDelegate dataDelegate,
       ESimConnect.ESimConnect.ESimConnectDelegate disconnectDelegate,
       ESimConnect.ESimConnect.ESimConnectExceptionDelegate exceptionDelegate)
@@ -24,7 +24,7 @@ namespace ESimConnectTest
       Console.WriteLine("Opening");
 
       eSimCon.Connected += connectDelegate;
-      eSimCon.EventInvoked += eventDelegate;
+      eSimCon.SystemEventInvoked += eventDelegate;
       eSimCon.DataReceived += dataDelegate;
       eSimCon.Disconnected += disconnectDelegate;
       eSimCon.ThrowsException += exceptionDelegate;
@@ -59,7 +59,7 @@ namespace ESimConnectTest
       Console.WriteLine("ESimCon - Disconnected");
     }
 
-    internal static void ESimCon_EventInvoked(ESimConnect.ESimConnect _, ESimConnect.ESimConnect.ESimConnectEventInvokedEventArgs e)
+    internal static void ESimCon_EventInvoked(ESimConnect.ESimConnect _, ESimConnect.ESimConnect.ESimConnectSystemEventInvokedEventArgs e)
     {
       Console.WriteLine($"ESimCon - Event invoked - event={e.Event}, eventId={e.EventId}, value={e.Value}");
     }

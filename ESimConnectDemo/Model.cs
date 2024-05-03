@@ -71,6 +71,12 @@ namespace ESimConnectDemo
                 }
             }
 
+            public int ValueToSet
+            {
+                get => base.GetProperty<int>(nameof(ValueToSet));
+                set => base.UpdateProperty(nameof(ValueToSet), value);
+            }
+
             public DateTime LastUpdateTime
             {
                 get => base.GetProperty<DateTime>(nameof(LastUpdateTime));
@@ -86,6 +92,17 @@ namespace ESimConnectDemo
             public List<SimConnectPeriod> Periods => Model.Periods;
         }
 
+        public class SimVarEvent : NotifyPropertyChanged
+        {
+            public EventId EventId { get; internal set; }
+            public string Name { get; internal set; } = null!;
+            public DateTime LastInvoked
+            {
+                get => base.GetProperty<DateTime>(nameof(LastInvoked))!;
+                set => base.UpdateProperty(nameof(LastInvoked), value);
+            }
+        }
+
         public EConnectionStatus ConnectionStatus
         {
             get => base.GetProperty<EConnectionStatus>(nameof(ConnectionStatus));
@@ -98,10 +115,24 @@ namespace ESimConnectDemo
             set => base.UpdateProperty(nameof(Values), value);
         }
 
+        public BindingList<SimVarEvent> Events
+        {
+            get => base.GetProperty<BindingList<SimVarEvent>>(nameof(Events))!;
+            set => base.UpdateProperty(nameof(Events), value);
+        }
+
+        public BindingList<string> FiredEvents
+        {
+            get => base.GetProperty<BindingList<string>>(nameof(FiredEvents))!;
+            set => base.UpdateProperty(nameof(FiredEvents), value);
+        }
+
         public Model()
         {
             ConnectionStatus = EConnectionStatus.DISCONNECTED;
             Values = new();
+            Events = new();
+            FiredEvents = new();
         }
 
         public static List<SimConnectPeriod> Periods
@@ -114,10 +145,10 @@ namespace ESimConnectDemo
         {
             Periods = new()
             {
-                ESimConnect.SimConnectPeriod.NEVER,
-                ESimConnect.SimConnectPeriod.SECOND,
-                ESimConnect.SimConnectPeriod.SIM_FRAME,
-                ESimConnect.SimConnectPeriod.VISUAL_FRAME
+                SimConnectPeriod.NEVER,
+                SimConnectPeriod.SECOND,
+                SimConnectPeriod.SIM_FRAME,
+                SimConnectPeriod.VISUAL_FRAME
             };
         }
     }

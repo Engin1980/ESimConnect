@@ -68,7 +68,7 @@ namespace ESimConnect
       #endregion Constructors
     }
 
-    public class ESimConnectEventInvokedEventArgs
+    public class ESimConnectSystemEventInvokedEventArgs
     {
       #region Properties
 
@@ -80,7 +80,7 @@ namespace ESimConnect
 
       #region Constructors
 
-      public ESimConnectEventInvokedEventArgs(EventId eventId, string @event, uint value)
+      public ESimConnectSystemEventInvokedEventArgs(EventId eventId, string @event, uint value)
       {
         EventId = eventId;
         Event = @event;
@@ -98,7 +98,7 @@ namespace ESimConnect
 
     public delegate void ESimConnectDelegate(ESimConnect _);
 
-    public delegate void ESimConnectEventInvokedDelegate(ESimConnect _, ESimConnectEventInvokedEventArgs e);
+    public delegate void ESimConnectSystemEventInvokedDelegate(ESimConnect _, ESimConnectSystemEventInvokedEventArgs e);
 
     public delegate void ESimConnectExceptionDelegate(ESimConnect _, SimConnectException ex);
 
@@ -112,7 +112,7 @@ namespace ESimConnect
 
     public event ESimConnectDelegate? Disconnected;
 
-    public event ESimConnectEventInvokedDelegate? EventInvoked;
+    public event ESimConnectSystemEventInvokedDelegate? SystemEventInvoked;
 
     public event ESimConnectExceptionDelegate? ThrowsException;
 
@@ -245,8 +245,8 @@ namespace ESimConnect
       string eventName = this.SystemEvents.GetEventNameByEventId(eventId);
       uint value = data.dwData;
 
-      ESimConnectEventInvokedEventArgs e = new(eventId, eventName, value);
-      this.EventInvoked?.Invoke(this, e);
+      ESimConnectSystemEventInvokedEventArgs e = new(eventId, eventName, value);
+      this.SystemEventInvoked?.Invoke(this, e);
     }
 
     private void SimConnect_OnRecvException(SimConnect _, SIMCONNECT_RECV_EXCEPTION data)

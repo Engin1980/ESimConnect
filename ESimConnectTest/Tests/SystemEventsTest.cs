@@ -55,7 +55,7 @@ namespace ESimConnectTest.Tests
             }
         }
 
-        private static void ESimCon_EventInvoked(ESimConnect.ESimConnect _, ESimConnectEventInvokedEventArgs e)
+        private static void ESimCon_EventInvoked(ESimConnect.ESimConnect _, ESimConnectSystemEventInvokedEventArgs e)
         {
             if (registeredEvents.TryGetValue(e.EventId, out string? registeredEventName) == false)
                 registeredEventName = "??-unknown-event-requestId--??";

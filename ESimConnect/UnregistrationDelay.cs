@@ -1,4 +1,5 @@
-﻿using Microsoft.FlightSimulator.SimConnect;
+﻿using ESystem.Exceptions;
+using Microsoft.FlightSimulator.SimConnect;
 using System;
 using System.Collections.Generic;
 using System.Linq;

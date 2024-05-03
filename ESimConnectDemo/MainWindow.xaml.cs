@@ -29,6 +29,15 @@ namespace ESimConnectDemo
             this.simCon.Disconnected += SimCon_Disconnected;
             this.simCon.ThrowsException += SimCon_ThrowsException;
             this.simCon.DataReceived += SimCon_DataReceived;
+            this.simCon.SystemEventInvoked += SimCon_EventInvoked;
+        }
+
+        private void SimCon_EventInvoked(ESimConnect.ESimConnect _, ESimConnect.ESimConnect.ESimConnectSystemEventInvokedEventArgs e)
+        {
+            Model.SimVarEvent? se = Model.Events.FirstOrDefault(q => q.EventId == e.EventId);
+            if (se == null) return;
+            se.LastInvoked = DateTime.Now;
+            Model.FiredEvents.Insert(0, $"System event '{se.Name}' invoked at '{se.LastInvoked}' with argument '{e.Value}'.");
         }
 
         private void SimCon_DataReceived(ESimConnect.ESimConnect _, ESimConnect.ESimConnect.ESimConnectDataReceivedEventArgs e)
@@ -81,15 +90,14 @@ namespace ESimConnectDemo
             }
 
             string simVar = txtValueSimVar.Text.Trim().ToUpper();
-            Model.SimVarValue svv = new Model.SimVarValue()
+            Model.SimVarValue svv = new()
             {
                 Name = simVar,
                 Value = 0,
-                Period = ESimConnect.SimConnectPeriod.SECOND,
-                OnlyOnChange = true
+                Period = SimConnectPeriod.SECOND,
+                OnlyOnChange = true,
+                TypeId = simCon.Values.Register<double>(simVar)
             };
-
-            svv.TypeId = simCon.Values.Register<double>(simVar);
             svv.RequestId = simCon.Values.RequestRepeatedly(svv.TypeId, svv.Period, sendOnlyOnChange: svv.OnlyOnChange);
 
             svv.UpdateRequest += Svv_UpdateRequest;
@@ -105,16 +113,47 @@ namespace ESimConnectDemo
             simCon.Values.RequestRepeatedly(sender.RequestId, sender.TypeId, sender.Period, sender.OnlyOnChange, skipBetweenFrames: sender.FrameSkip);
         }
 
-        private void cmbSelectedPeriod_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
         private void btnValueDelete_Click(object sender, RoutedEventArgs e)
         {
             Button btn = (Button)sender;
             Model.SimVarValue svv = (Model.SimVarValue)btn.Tag;
             Model.Values.Remove(svv);
+        }
+
+        private void btnAddSystemEvent_Click(object sender, RoutedEventArgs e)
+        {
+            if (simCon.IsOpened == false)
+            {
+                MessageBox.Show("SimCon not connected.", "Error");
+                return;
+            }
+
+            string eventName = cmbSystemEvent.Text;
+            EventId eid = simCon.SystemEvents.Register(eventName);
+            Model.SimVarEvent se = new()
+            {
+                Name = eventName,
+                EventId = eid
+            };
+            this.Model.Events.Add(se);
+
+            cmbSystemEvent.SelectedIndex = -1;
+        }
+
+        private void btnDeleteSystemEvent_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)sender;
+            Model.SimVarEvent? se = (Model.SimVarEvent)btn.Tag;
+            if (se == null) return;
+            simCon.SystemEvents.Unregister(se.EventId);
+            Model.Events.Remove(se);
+        }
+
+        private void btnSimVarSetValue_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)sender;
+            Model.SimVarValue svv = (Model.SimVarValue)btn.Tag;
+            simCon.Values.Send<double>(svv.TypeId, svv.ValueToSet);
         }
     }
 }
