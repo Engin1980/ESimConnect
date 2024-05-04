@@ -78,6 +78,7 @@ namespace ESimConnectDemo
                 catch (ESimConnectException ex)
                 {
                     MessageBox.Show("Failed to connect: " + ex.Message, "Error");
+                    btnConnectDisconnect.IsEnabled = true;
                 }
         }
 
