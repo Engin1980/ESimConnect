@@ -3,6 +3,7 @@ using Microsoft.FlightSimulator.SimConnect;
 using System;
 using System.Linq;
 using System.Reflection;
+using ESimConnect.Definitions;
 
 namespace ESimConnect
 {

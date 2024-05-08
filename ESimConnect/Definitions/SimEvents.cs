@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ESimConnect.Enumerations
+namespace ESimConnect.Definitions
 {
     public static partial class SimEvents
     {

@@ -11,7 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media.Animation;
 
-namespace ESimConnect
+namespace ESimConnect.Definitions
 {
   public static partial class SimVars
   {

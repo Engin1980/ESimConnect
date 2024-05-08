@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static ESimConnect.SimClientEvents;
+using static ESimConnect.Definitions.SimClientEvents;
 
-namespace ESimConnect
+namespace ESimConnect.Definitions
 {
   public partial class SimClientEvents
   {

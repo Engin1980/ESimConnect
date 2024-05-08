@@ -1,7 +1,7 @@
 ﻿using ESimConnect.Definitions;
 using System.ComponentModel.DataAnnotations;
 
-namespace ESimConnect
+namespace ESimConnect.Definitions
 {
   public static partial class SimVars
   {

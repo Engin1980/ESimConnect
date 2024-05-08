@@ -1,4 +1,4 @@
-﻿namespace ESimConnect
+﻿namespace ESimConnect.Definitions
 {
   public static partial class SimVars
   {

@@ -1,4 +1,5 @@
 using ELogging;
+using ESimConnect.Definitions;
 using ESimConnect.Types;
 using ESystem.Asserting;
 using Microsoft.FlightSimulator.SimConnect;
