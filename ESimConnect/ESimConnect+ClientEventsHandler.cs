@@ -51,7 +51,7 @@ namespace ESimConnect
         FieldInfo? extractEventField(string eventName, Type? cls = null)
         {
           FieldInfo? ret;
-          if (cls == null) cls = typeof(SimClientEvents);
+          if (cls == null) cls = typeof(SimEvents.Client);
 
           ret = cls.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
             .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
@@ -71,7 +71,7 @@ namespace ESimConnect
 
         FieldInfo? eventField = extractEventField(eventName) ?? throw new Exception($"Event '{eventName}' not found in declarations.");
 
-        var paramAttrs = eventField.GetCustomAttributes().Where(q => q is SimClientEvents.Parameter).Cast<SimClientEvents.Parameter>();
+        var paramAttrs = eventField.GetCustomAttributes().Where(q => q is SimEvents.Client.Parameter).Cast<SimEvents.Client.Parameter>();
         if (paramAttrs.Count() != parameters.Length)
         {
           throw new Exception($"Event '{eventName}' parameter check failed. Expected {paramAttrs.Count()} params, provided {parameters.Length}.");
