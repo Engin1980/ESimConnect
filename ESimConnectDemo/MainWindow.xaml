@@ -6,112 +6,114 @@
         xmlns:ex="clr-namespace:ESimConnect;assembly=ESimConnect"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <DockPanel>
-        <DockPanel DockPanel.Dock="Top">
-            <Button x:Name="btnConnectDisconnect" Content="Connect / Disconnect" Click="btnConnectDisconnect_Click" DockPanel.Dock="Left" Padding="8" />
-            <Label Content="{Binding ConnectionStatus}" />
-        </DockPanel>
-        <TabControl>
-            <TabItem Header="SimVars">
-                <DockPanel>
-                    <DockPanel DockPanel.Dock="Top">
-                        <Label DockPanel.Dock="Left" Content="SimVar Name:"/>
-                        <Button x:Name="btnValueSimVarAdd" Content="Add" Click="btnValueSimVarAdd_Click" DockPanel.Dock="Right" Padding="8 0 8 0" />
-                        <TextBox x:Name="txtValueSimVar" />
-                    </DockPanel>
-                    <DataGrid ItemsSource="{Binding Values}" AutoGenerateColumns="False" CanUserAddRows="False">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn IsReadOnly="True" Header="SimVar Name" Binding="{Binding Name}" />
-                            <DataGridTextColumn IsReadOnly="True" Header="Value" Binding="{Binding Value}" />
-                            <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.Header>
-                                    <Label Content="Periods" />
-                                </DataGridTemplateColumn.Header>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <ComboBox x:Name="cmbSelectedPeriod" ItemsSource="{Binding Periods}" SelectedItem="{Binding Period, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                  Tag="{Binding RequestId}">
-                                        </ComboBox>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridCheckBoxColumn x:Name="chkOnlyChange" Header="Only changes" Binding="{Binding OnlyOnChange, UpdateSourceTrigger=PropertyChanged}"  />
-                            <DataGridTextColumn Header="Skip" Binding="{Binding FrameSkip, UpdateSourceTrigger=PropertyChanged}" />
-                            <DataGridTextColumn IsReadOnly="True" Header="Last update" Binding="{Binding LastUpdateInterval}" />
-                            <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBox Text="{Binding ValueToSet, UpdateSourceTrigger=PropertyChanged}" Width="50" />
-                                            <Button x:Name="btnSimVarSetValue" Tag="{Binding}" Content="(Set)" Click ="btnSimVarSetValue_Click" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button Tag="{Binding}" Content="(Delete)" x:Name="btnValueDelete" Click="btnValueDelete_Click" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </DockPanel>
-            </TabItem>
-            <TabItem Header="SimEvents" Height="20" VerticalAlignment="Top">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <DockPanel Grid.Row="0">
-                        <Button DockPanel.Dock="Right" Content="Add" Padding="8 0 8 0" x:Name="btnAddSystemEvent" Click="btnAddSystemEvent_Click" />
-                        <Label Content="Event name:" />
-                        <ComboBox IsEditable="True" x:Name="cmbSystemEvent">
-                            <ComboBoxItem>1sec</ComboBoxItem>
-                            <ComboBoxItem>4sec</ComboBoxItem>
-                            <ComboBoxItem>6Hz</ComboBoxItem>
-                            <ComboBoxItem>AircraftLoaded</ComboBoxItem>
-                            <ComboBoxItem>Crashed</ComboBoxItem>
-                            <ComboBoxItem>CrashReset</ComboBoxItem>
-                            <ComboBoxItem>FlightLoaded</ComboBoxItem>
-                            <ComboBoxItem>FlightSaved</ComboBoxItem>
-                            <ComboBoxItem>FlightPlanActivated</ComboBoxItem>
-                            <ComboBoxItem>FlightPlanDeactivated</ComboBoxItem>
-                            <ComboBoxItem>Frame</ComboBoxItem>
-                            <ComboBoxItem>ObjectAdded</ComboBoxItem>
-                            <ComboBoxItem>ObjectRemoved</ComboBoxItem>
-                            <ComboBoxItem>Pause</ComboBoxItem>
-                            <ComboBoxItem>Pause_EX1</ComboBoxItem>
-                            <ComboBoxItem>Paused</ComboBoxItem>
-                            <ComboBoxItem>PauseFrame</ComboBoxItem>
-                            <ComboBoxItem>PositionChanged</ComboBoxItem>
-                            <ComboBoxItem>Sim</ComboBoxItem>
-                            <ComboBoxItem>SimStart</ComboBoxItem>
-                            <ComboBoxItem>SimStop</ComboBoxItem>
-                            <ComboBoxItem>Sound</ComboBoxItem>
-                            <ComboBoxItem>Unpaused</ComboBoxItem>
-                            <ComboBoxItem>View</ComboBoxItem>
-                        </ComboBox>
-                    </DockPanel>
-                    <DataGrid Grid.Row="1" CanUserAddRows="False" AutoGenerateColumns="False" ItemsSource="{Binding Events}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn IsReadOnly="True" Header="Name" Binding="{Binding Name}" />
-                            <DataGridTextColumn IsReadOnly="True" Header="Lastly invoked" Binding="{Binding LastInvoked}" />
-                            <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button x:Name="btnDeleteSystemEvent" Tag="{Binding}" Padding="8 0 8 0" Content="(Delete)"  Click="btnDeleteSystemEvent_Click" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <ListBox Grid.Row="2" ItemsSource="{Binding FiredEvents}" />
-                </Grid>
-            </TabItem>
-        </TabControl>
+  <DockPanel>
+    <DockPanel DockPanel.Dock="Top">
+      <Button x:Name="btnConnectDisconnect" Content="Connect / Disconnect" Click="btnConnectDisconnect_Click" DockPanel.Dock="Left" Padding="8" />
+      <Label Content="{Binding ConnectionStatus}" />
     </DockPanel>
+    <TabControl>
+      <TabItem Header="SimVars">
+        <DockPanel>
+          <DockPanel DockPanel.Dock="Top">
+            <Label DockPanel.Dock="Left" Content="SimVar Name:"/>
+            <Button x:Name="btnValueSimVarAdd" Content="Add" Click="btnValueSimVarAdd_Click" DockPanel.Dock="Right" Padding="8 0 8 0" />
+            <ComboBox x:Name="cmbUnit" DockPanel.Dock="Right" ItemsSource="{Binding SimUnits}" Width="200" DisplayMemberPath="Label" SelectedValuePath="Value" />
+            <TextBox x:Name="txtValueSimVar" />
+          </DockPanel>
+          <DataGrid ItemsSource="{Binding Values}" AutoGenerateColumns="False" CanUserAddRows="False">
+            <DataGrid.Columns>
+              <DataGridTextColumn IsReadOnly="True" Header="SimVar Name" Binding="{Binding Name}" />
+              <DataGridTextColumn IsReadOnly="True" Header="Unit" Binding="{Binding UnitName}" />
+              <DataGridTextColumn IsReadOnly="True" Header="Value" Binding="{Binding Value}" />
+              <DataGridTemplateColumn>
+                <DataGridTemplateColumn.Header>
+                  <Label Content="Periods" />
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <ComboBox x:Name="cmbSelectedPeriod" ItemsSource="{Binding Periods}" SelectedItem="{Binding Period, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  Tag="{Binding RequestId}">
+                    </ComboBox>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridCheckBoxColumn x:Name="chkOnlyChange" Header="Only changes" Binding="{Binding OnlyOnChange, UpdateSourceTrigger=PropertyChanged}"  />
+              <DataGridTextColumn Header="Skip" Binding="{Binding FrameSkip, UpdateSourceTrigger=PropertyChanged}" />
+              <DataGridTextColumn IsReadOnly="True" Header="Last update" Binding="{Binding LastUpdateInterval}" />
+              <DataGridTemplateColumn>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                      <TextBox Text="{Binding ValueToSet, UpdateSourceTrigger=PropertyChanged}" Width="50" />
+                      <Button x:Name="btnSimVarSetValue" Tag="{Binding}" Content="(Set)" Click ="btnSimVarSetValue_Click" />
+                    </StackPanel>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button Tag="{Binding}" Content="(Delete)" x:Name="btnValueDelete" Click="btnValueDelete_Click" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="SimEvents" Height="20" VerticalAlignment="Top">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <DockPanel Grid.Row="0">
+            <Button DockPanel.Dock="Right" Content="Add" Padding="8 0 8 0" x:Name="btnAddSystemEvent" Click="btnAddSystemEvent_Click" />
+            <Label Content="Event name:" />
+            <ComboBox IsEditable="True" x:Name="cmbSystemEvent">
+              <ComboBoxItem>1sec</ComboBoxItem>
+              <ComboBoxItem>4sec</ComboBoxItem>
+              <ComboBoxItem>6Hz</ComboBoxItem>
+              <ComboBoxItem>AircraftLoaded</ComboBoxItem>
+              <ComboBoxItem>Crashed</ComboBoxItem>
+              <ComboBoxItem>CrashReset</ComboBoxItem>
+              <ComboBoxItem>FlightLoaded</ComboBoxItem>
+              <ComboBoxItem>FlightSaved</ComboBoxItem>
+              <ComboBoxItem>FlightPlanActivated</ComboBoxItem>
+              <ComboBoxItem>FlightPlanDeactivated</ComboBoxItem>
+              <ComboBoxItem>Frame</ComboBoxItem>
+              <ComboBoxItem>ObjectAdded</ComboBoxItem>
+              <ComboBoxItem>ObjectRemoved</ComboBoxItem>
+              <ComboBoxItem>Pause</ComboBoxItem>
+              <ComboBoxItem>Pause_EX1</ComboBoxItem>
+              <ComboBoxItem>Paused</ComboBoxItem>
+              <ComboBoxItem>PauseFrame</ComboBoxItem>
+              <ComboBoxItem>PositionChanged</ComboBoxItem>
+              <ComboBoxItem>Sim</ComboBoxItem>
+              <ComboBoxItem>SimStart</ComboBoxItem>
+              <ComboBoxItem>SimStop</ComboBoxItem>
+              <ComboBoxItem>Sound</ComboBoxItem>
+              <ComboBoxItem>Unpaused</ComboBoxItem>
+              <ComboBoxItem>View</ComboBoxItem>
+            </ComboBox>
+          </DockPanel>
+          <DataGrid Grid.Row="1" CanUserAddRows="False" AutoGenerateColumns="False" ItemsSource="{Binding Events}">
+            <DataGrid.Columns>
+              <DataGridTextColumn IsReadOnly="True" Header="Name" Binding="{Binding Name}" />
+              <DataGridTextColumn IsReadOnly="True" Header="Lastly invoked" Binding="{Binding LastInvoked}" />
+              <DataGridTemplateColumn>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button x:Name="btnDeleteSystemEvent" Tag="{Binding}" Padding="8 0 8 0" Content="(Delete)"  Click="btnDeleteSystemEvent_Click" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+          <ListBox Grid.Row="2" ItemsSource="{Binding FiredEvents}" />
+        </Grid>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
 </Window>
