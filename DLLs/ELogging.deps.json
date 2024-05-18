@@ -6,15 +6,15 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "ELogging/1.0.0": {
+      "ELogging/1.2.3.1": {
         "dependencies": {
-          "ESystem": "1.0.0"
+          "ESystem": "1.2.5"
         },
         "runtime": {
           "ELogging.dll": {}
         }
       },
-      "ESystem/1.0.0": {
+      "ESystem/1.2.5": {
         "runtime": {
           "ESystem.dll": {}
         }
@@ -22,12 +22,12 @@
     }
   },
   "libraries": {
-    "ELogging/1.0.0": {
+    "ELogging/1.2.3.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "ESystem/1.0.0": {
+    "ESystem/1.2.5": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
