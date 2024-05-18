@@ -2,7 +2,7 @@
 
 A simple library to connect and work with SimConnect, a library allowing to communicate with Flight Simulators (e.g., FS2020).
 
-The aim of this library is to provide a simple interface to work with FS2020 over .NET/C# without no deep knowledge of SimConnect. On the other side, only the basic operations are supported. This library is not convering all the possibilities of original SimConnect library.
+The aim of this library is to provide a simple interface to work with FS2020 over .NET/C# without no deep knowledge of SimConnect. On the other side, only the basic operations are supported. This library is not covering all the possibilities of original SimConnect library.
 
 ## Requirements
 
