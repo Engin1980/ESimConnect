@@ -22,11 +22,15 @@ namespace ESimConnect.Extenders
     private readonly Dictionary<TypeDefinition, TypeId> types = new();
     private readonly BiDictionary<TypeId, RequestId> requests = new();
     private readonly ConcurrentDictionary<TypeId, double> values = new();
+    private readonly SimConnectPeriod period;
 
     public event Action<ValueChangeEventArgs>? ValueChanged;
 
-    public ValueCacheExtender(ESimConnect eSimCon) : base(eSimCon)
+    public ValueCacheExtender(ESimConnect eSimCon, SimConnectPeriod period = SimConnectPeriod.SECOND) : base(eSimCon)
     {
+      EAssert.Argument.IsTrue(period != SimConnectPeriod.NEVER, nameof(period), "Period cannot be 'ONCE' or 'NEVER'");
+
+      this.period = period;
       eSimCon.DataReceived += ESimCon_DataReceived;
     }
 
@@ -38,17 +42,14 @@ namespace ESimConnect.Extenders
       this.ValueChanged?.Invoke(new ValueChangeEventArgs(typeId, value));
     }
 
-    public (TypeId, RequestId) Register(
+    public TypeId Register(
       string name,
       string unit = DEFAULT_UNIT,
-      SimConnectSimTypeName type = DEFAULT_TYPE,
-      SimConnectPeriod period = 0)
+      SimConnectSimTypeName type = DEFAULT_TYPE)
     {
       TypeId typeId = RegisterTypeIfRequired(name, unit, type);
-
-      //TODO here deal with situation when new period is shorter than the previous one
-      RequestId requestId = RequestRepeatedlyIfRequired(typeId, period);
-      return (typeId, requestId);
+      RequestRepeatedlyIfRequired(typeId);
+      return typeId;
     }
 
     public double GetValue(TypeId typeId)
@@ -58,20 +59,16 @@ namespace ESimConnect.Extenders
       return ret;
     }
 
-    private RequestId RequestRepeatedlyIfRequired(TypeId typeId, SimConnectPeriod period)
+    private void RequestRepeatedlyIfRequired(TypeId typeId)
     {
-      RequestId ret;
       lock (lck)
       {
-        RequestId? rqId = requests.TryGet(typeId);
-        if (rqId == null)
+        if (requests.TryGetValue(typeId, out RequestId requestId) == false)
         {
-          var requestId = eSimCon.Values.RequestRepeatedly(typeId, period, true);
+          requestId = eSimCon.Values.RequestRepeatedly(typeId, this.period, true);
           requests[typeId] = requestId;
         }
-        ret = requests[typeId];
       }
-      return ret;
     }
 
     private TypeId RegisterTypeIfRequired(string name, string unit, SimConnectSimTypeName type)
@@ -80,8 +77,7 @@ namespace ESimConnect.Extenders
       TypeDefinition td = new(name, unit, type);
       lock (lck)
       {
-        TypeId? tdr = types.TryGet(td);
-        if (tdr == null)
+        if (types.TryGetValue(td, out ret) == false)
         {
           var typeId = eSimCon.Values.Register<double>(td.Name, unit: td.Unit, simTypeName: td.Type);
           types[td] = typeId;
