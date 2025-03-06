@@ -70,6 +70,7 @@ namespace ESimConnect
     XYZ,
     MAX
   }
+  
   public enum SimConnectSimObjectType
   {
     USER,
