@@ -10,8 +10,10 @@ namespace ESimConnect.Extenders
 {
   public class TypeCacheExtender
   {
+    private readonly object lck = new();
     private readonly ValueCacheExtender cache;
     private readonly Dictionary<PropertyInfo, TypeId> props = new();
+    private readonly HashSet<Type> types = new();
 
     public TypeCacheExtender(ValueCacheExtender cache)
     {
@@ -22,21 +24,25 @@ namespace ESimConnect.Extenders
     public void Register(Type type)
     {
       var tmp = type
-        .GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)
+        .GetProperties(BindingFlags.Instance | BindingFlags.Public)
         .Select(q => new { Property = q, Attribute = q.GetCustomAttribute<SimPropertyAttribute>() })
         .Where(q => q.Attribute != null)
         .ToList();
 
-      foreach (var item in tmp)
+      lock (lck)
       {
-        TypeId typeId = cache.Register(item.Attribute!.Name, item.Attribute.Unit, item.Attribute.Type);
-        props[item.Property] = typeId;
+        foreach (var item in tmp)
+        {
+          TypeId typeId = cache.Register(item.Attribute!.Name, item.Attribute.Unit, item.Attribute.Type);
+          props[item.Property] = typeId;
+        }
+        types.Add(type);
       }
     }
 
     public T GetSnapshost<T>() where T : new()
     {
-      T ret = new T();
+      T ret = new();
       FillSnapshost(ret);
       return ret;
     }
@@ -50,21 +56,30 @@ namespace ESimConnect.Extenders
         .Where(q => q.Attribute != null)
         .ToList();
 
-      var misses = tmp.Where(q => props.ContainsKey(q.Property) == false).ToList();
-      if (misses.Any())
+      bool isRegisteredType;
+      lock (lck)
       {
-        throw new ApplicationException(
-          $"Requested properties " +
-          $"'{string.Join(",", misses.Select(q => q.Property.DeclaringType + "." + q.Property.Name))}' " +
-          $"were not registered. Did you register the type first?");
+        isRegisteredType = types.Contains(snapshot.GetType());
       }
+      if (!isRegisteredType)
+        throw new TypeCacheExtenderException(
+          $"Snapshot request for type '{snapshot.GetType().FullName}' " +
+          $"was invoked, but type was not registered first.");
 
       foreach (var item in tmp)
       {
         TypeId typeId = props[item.Property];
         double val = cache.GetValue(typeId);
-        object targetVal = Convert.ChangeType(val, item.Property.PropertyType);
-        item.Property.SetValue(snapshot, targetVal);
+        try
+        {
+          object targetVal = Convert.ChangeType(val, item.Property.PropertyType);
+          item.Property.SetValue(snapshot, targetVal);
+        }
+        catch (Exception ex)
+        {
+          throw new TypeCacheExtenderException(
+            $"Failed to inject value '{val}' to property '{snapshot.GetType().Name}.{item.Property.Name}'.", ex);
+        }
       }
     }
   }
