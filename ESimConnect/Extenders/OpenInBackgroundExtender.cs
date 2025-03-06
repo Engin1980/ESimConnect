@@ -83,7 +83,7 @@ namespace ESimConnect.Extenders
       }
     }
 
-    public void OpenInBackground(Action? onStarted)
+    public void OpenInBackground(Action? onStarted = null)
     {
       AddOnStartedIfRequired(onStarted);
 

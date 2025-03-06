@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,14 +35,6 @@ namespace ESimConnect.Extenders
       eSimCon.DataReceived += ESimCon_DataReceived;
     }
 
-    private void ESimCon_DataReceived(ESimConnect _, ESimConnect.ESimConnectDataReceivedEventArgs e)
-    {
-      TypeId typeId = requests[e.RequestId];
-      double value = (double)e.Data;
-      values[typeId] = value;
-      this.ValueChanged?.Invoke(new ValueChangeEventArgs(typeId, value));
-    }
-
     public TypeId Register(
       string name,
       string unit = DEFAULT_UNIT,
@@ -50,13 +43,21 @@ namespace ESimConnect.Extenders
       TypeId typeId = RegisterTypeIfRequired(name, unit, type);
       RequestRepeatedlyIfRequired(typeId);
       return typeId;
-    }
+    }    
 
     public double GetValue(TypeId typeId)
     {
       EAssert.Argument.IsTrue(values.ContainsKey(typeId), nameof(typeId), "Not registered.");
       double ret = values[typeId];
       return ret;
+    }    
+
+    private void ESimCon_DataReceived(ESimConnect _, ESimConnect.ESimConnectDataReceivedEventArgs e)
+    {
+      TypeId typeId = requests[e.RequestId];
+      double value = (double)e.Data;
+      values[typeId] = value;
+      this.ValueChanged?.Invoke(new ValueChangeEventArgs(typeId, value));
     }
 
     private void RequestRepeatedlyIfRequired(TypeId typeId)

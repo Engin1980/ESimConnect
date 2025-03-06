@@ -7,8 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <PlatformTarget>x64</PlatformTarget>
-    <AssemblyVersion>1.1.1.5</AssemblyVersion>
-    <FileVersion>1.1.1.5</FileVersion>
+    <AssemblyVersion>1.1.1.9</AssemblyVersion>
+    <FileVersion>1.1.1.9</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
