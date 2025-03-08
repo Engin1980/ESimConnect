@@ -21,6 +21,11 @@ namespace ESimConnect.Extenders
       this.cache = cache;
     }
 
+    public void Register<T>()
+    {
+      this.Register(typeof(T));
+    }
+
     public void Register(Type type)
     {
       var tmp = type
