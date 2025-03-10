@@ -10,7 +10,7 @@ namespace ESimConnect.Extenders
   /// <summary>
   /// Provides event and states for Sim-Second-Elapsed and Paused.
   /// </summary>
-  public class SimTimExtender : AbstractExtender
+  public class SimTimeExtender : AbstractExtender
   {
     /// <summary>
     /// Returns True if sim is paused, false otherwise.
@@ -33,7 +33,7 @@ namespace ESimConnect.Extenders
     /// </summary>
     /// <param name="eSimConnect">Underlying eSimConnect object.</param>
     /// <param name="invokeSimSecondEventsOnPause">True if SimSecond should be invoked on pause, false otherwise.</param>
-    public SimTimExtender(ESimConnect eSimConnect, bool invokeSimSecondEventsOnPause) : base(eSimConnect)
+    public SimTimeExtender(ESimConnect eSimConnect, bool invokeSimSecondEventsOnPause) : base(eSimConnect)
     {
       EAssert.Argument.IsNotNull(eSimConnect, nameof(eSimConnect));
       base.eSimCon.SystemEventInvoked += SimCon_EventInvoked;

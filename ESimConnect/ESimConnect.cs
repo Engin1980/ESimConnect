@@ -122,13 +122,13 @@ namespace ESimConnect
 
     #region Delegates
 
-    public delegate void ESimConnectDataReceivedDelegate(ESimConnect _, ESimConnectDataReceivedEventArgs e);
+    public delegate void ESimConnectDataReceivedDelegate(ESimConnect sender, ESimConnectDataReceivedEventArgs e);
 
-    public delegate void ESimConnectDelegate(ESimConnect _);
+    public delegate void ESimConnectDelegate(ESimConnect sender);
 
-    public delegate void ESimConnectSystemEventInvokedDelegate(ESimConnect _, ESimConnectSystemEventInvokedEventArgs e);
+    public delegate void ESimConnectSystemEventInvokedDelegate(ESimConnect sender, ESimConnectSystemEventInvokedEventArgs e);
 
-    public delegate void ESimConnectExceptionDelegate(ESimConnect _, SimConnectException ex);
+    public delegate void ESimConnectExceptionDelegate(ESimConnect sender, SimConnectException ex);
 
     #endregion Delegates
 

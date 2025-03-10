@@ -14,7 +14,7 @@ namespace ESimConnect.Extenders
   /// <remarks>
   /// The point is to have a class with properties annotated with <see cref="SimPropertyAttribute"/>
   /// For every property, this attribute defines its mapping to SimVar.
-  /// Once such type is registered, the call of <see cref="GetSnapshost{T}">GetSnapshot()</see> will 
+  /// Once such type is registered, the call of <see cref="GetSnapshot{T}">GetSnapshot()</see> will 
   /// fill/return and instance with current SimVar data in properties. />
   /// </remarks>
   public class TypeCacheExtender
@@ -72,10 +72,10 @@ namespace ESimConnect.Extenders
     /// <typeparam name="T">Registered type.</typeparam>
     /// <returns>Snapshot of SimVar values in properties in a new instance.</returns>
     /// <exception cref="TypeCacheExtenderException">Thows exception if type is not registered.</exception>
-    public T GetSnapshost<T>() where T : new()
+    public T GetSnapshot<T>() where T : new()
     {
       T ret = new();
-      FillSnapshost(ret);
+      FillSnapshot(ret);
       return ret;
     }
 
@@ -85,7 +85,7 @@ namespace ESimConnect.Extenders
     /// <typeparam name="T">Registered type.</typeparam>
     /// <param name="snapshot">Instace of registerd type.</param>
     /// <exception cref="TypeCacheExtenderException">Thows exception if type is not registered.</exception>
-    public void FillSnapshost<T>(T snapshot)
+    public void FillSnapshot<T>(T snapshot)
     {
       EAssert.Argument.IsNotNull(snapshot, nameof(snapshot));
       var tmp = snapshot.GetType()

@@ -17,6 +17,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DLLs", "DLLs", "{95F4DEB8-6
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESimConnectDemo", "ESimConnectDemo\ESimConnectDemo.csproj", "{D3F687CB-AD4A-41F1-9BE7-749EF1ACBA36}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tutorials", "Tutorials", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESimConnectSimVarRead", "Tutorials\ESimConnectSimVarRead\ESimConnectSimVarRead.csproj", "{470B48F5-17B9-41D9-8638-2B9BC306A1C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESimConnectSimEvent", "Tutorials\ESimConnectSimEvent\ESimConnectSimEvent.csproj", "{107C7966-EE3D-410E-98D2-0A2D229EA81A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValueCacheExtenderExample", "Tutorials\ValueCacheExtenderExample\ValueCacheExtenderExample.csproj", "{668DC7EF-4ECA-4E1A-89F3-7793A2EC3A9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESimConnectSimVarStruct", "Tutorials\ESimConnectSimVarStruct\ESimConnectSimVarStruct.csproj", "{630A58DC-1B43-4AC5-8EA3-5D880D225AB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeCacheExtenderExample", "Tutorials\TypeCacheExtenderExample\TypeCacheExtenderExample.csproj", "{23D67489-0988-4EB6-8E21-D240F431AC2E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,9 +47,36 @@ Global
 		{D3F687CB-AD4A-41F1-9BE7-749EF1ACBA36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3F687CB-AD4A-41F1-9BE7-749EF1ACBA36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3F687CB-AD4A-41F1-9BE7-749EF1ACBA36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{470B48F5-17B9-41D9-8638-2B9BC306A1C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{470B48F5-17B9-41D9-8638-2B9BC306A1C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{470B48F5-17B9-41D9-8638-2B9BC306A1C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{470B48F5-17B9-41D9-8638-2B9BC306A1C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{107C7966-EE3D-410E-98D2-0A2D229EA81A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{107C7966-EE3D-410E-98D2-0A2D229EA81A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{107C7966-EE3D-410E-98D2-0A2D229EA81A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{107C7966-EE3D-410E-98D2-0A2D229EA81A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{668DC7EF-4ECA-4E1A-89F3-7793A2EC3A9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{668DC7EF-4ECA-4E1A-89F3-7793A2EC3A9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{668DC7EF-4ECA-4E1A-89F3-7793A2EC3A9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{668DC7EF-4ECA-4E1A-89F3-7793A2EC3A9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{630A58DC-1B43-4AC5-8EA3-5D880D225AB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{630A58DC-1B43-4AC5-8EA3-5D880D225AB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{630A58DC-1B43-4AC5-8EA3-5D880D225AB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{630A58DC-1B43-4AC5-8EA3-5D880D225AB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23D67489-0988-4EB6-8E21-D240F431AC2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23D67489-0988-4EB6-8E21-D240F431AC2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23D67489-0988-4EB6-8E21-D240F431AC2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23D67489-0988-4EB6-8E21-D240F431AC2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{470B48F5-17B9-41D9-8638-2B9BC306A1C2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{107C7966-EE3D-410E-98D2-0A2D229EA81A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{668DC7EF-4ECA-4E1A-89F3-7793A2EC3A9F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{630A58DC-1B43-4AC5-8EA3-5D880D225AB4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{23D67489-0988-4EB6-8E21-D240F431AC2E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E1CEC6B8-45BC-4B0C-98ED-A0B48A9D3EA7}
