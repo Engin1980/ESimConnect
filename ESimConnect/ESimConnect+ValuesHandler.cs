@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using static ESimConnect.Types.RequestsManager;
+using static ESystem.Functions.TryCatch;
 
 namespace ESimConnect
 {
@@ -16,7 +17,7 @@ namespace ESimConnect
       private const SimConnectSimObjectType DEFAULT_SIMOBJECT_TYPE = SimConnectSimObjectType.USER;
       private readonly TypeManager typeManager = new();
 
-      public ValuesHandler(ESimConnect parent) : base(parent)
+      internal ValuesHandler(ESimConnect parent) : base(parent)
       {
       }
 
@@ -32,11 +33,11 @@ namespace ESimConnect
 
         if (validate) ValidateSimVarName(simVarName);
 
-        parent.Try(
+        Try(
           () => parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(), simVarName, unit, simType, epsilon, SimConnect.SIMCONNECT_UNUSED),
           ex => new InternalException("Failed to invoke 'simConnect.AddToDataDefinition(...)'.", ex));
 
-        parent.Try(
+        Try(
           () => parent.simConnect!.RegisterDataDefineStruct<T>(typeId.ToEEnum()),
           ex => new InternalException("Failed to invoke 'simConnect.RegisterDataDefineStruct<T>(...)'.", ex));
 
@@ -89,7 +90,7 @@ namespace ESimConnect
 
         SIMCONNECT_PERIOD simPeriod = EnumConverter.Convert<SimConnectPeriod, SIMCONNECT_PERIOD>(period);
 
-        parent.Try(() =>
+        Try(() =>
           parent.simConnect.RequestDataOnSimObject(
             requestId.ToEEnum(), typeId.ToEEnum(), SimConnect.SIMCONNECT_OBJECT_ID_USER, simPeriod,
             flag, (uint)initialDelayFrames, (uint)skipBetweenFrames, (uint)numberOfReturnedFrames),
@@ -144,7 +145,7 @@ namespace ESimConnect
 
         foreach (var typeId in typeIds)
         {
-          parent.Try(
+          Try(
           () => this.parent.simConnect!.ClearDataDefinition(typeId.ToEEnum()),
           ex => new InternalException($"Failed to unregister value-typeId '{typeId}' / type '{typeManager[typeId].FullName}'.", ex));
         }

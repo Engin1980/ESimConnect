@@ -18,10 +18,15 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Animation;
 using System.Windows.Media.TextFormatting;
+using static ESystem.Functions.TryCatch;
 
 namespace ESimConnect
 {
-    public partial class ESimConnect : IDisposable
+
+  /// <summary>
+  /// Wrapper for Ms.Simconnect object.
+  /// </summary>
+  public partial class ESimConnect : IDisposable
   {
     #region Classes + Structs
 
@@ -51,8 +56,19 @@ namespace ESimConnect
     {
       #region Properties
 
+      /// <summary>
+      /// Returned data
+      /// </summary>
       public object Data { get; set; }
+
+      /// <summary>
+      /// Corresponding RequestId
+      /// </summary>
       public RequestId RequestId { get; set; }
+
+      /// <summary>
+      /// Type of data
+      /// </summary>
       public Type Type { get; set; }
 
       #endregion Properties
@@ -73,8 +89,19 @@ namespace ESimConnect
     {
       #region Properties
 
+      /// <summary>
+      /// Event name.
+      /// </summary>
       public string Event { get; }
+
+      /// <summary>
+      /// Corresponding EventId
+      /// </summary>
       public EventId EventId { get; }
+
+      /// <summary>
+      /// Value
+      /// </summary>
       public uint Value { get; }
 
       #endregion Properties
@@ -107,14 +134,32 @@ namespace ESimConnect
 
     #region Events
 
+    /// <summary>
+    /// Invoked when connected.
+    /// </summary>
     public event ESimConnectDelegate? Connected;
 
+    /// <summary>
+    /// Invoked when data are received.
+    /// </summary>
+    /// <remarks>
+    /// Some requests must be registered first to receive some data.
+    /// </remarks>
     public event ESimConnectDataReceivedDelegate? DataReceived;
 
+    /// <summary>
+    /// Invoked when disconnected.
+    /// </summary>
     public event ESimConnectDelegate? Disconnected;
 
+    /// <summary>
+    /// Invoked when system event occured.
+    /// </summary>
     public event ESimConnectSystemEventInvokedDelegate? SystemEventInvoked;
 
+    /// <summary>
+    /// Invoked on any error received from SimConnect
+    /// </summary>
     public event ESimConnectExceptionDelegate? ThrowsException;
 
     #endregion Events
@@ -137,17 +182,38 @@ namespace ESimConnect
 
     #region Properties
 
+    /// <summary>
+    /// Offers operations over structs.
+    /// </summary>
     public StructsHandler Structs => _Structs;
+    
+    /// <summary>
+    /// Offers operations over System (FS) Events.
+    /// </summary>
     public SystemEventsHandler SystemEvents => _SystemEvents;
+    
+    /// <summary>
+    /// Offers operations over SimVars.
+    /// </summary>
     public ValuesHandler Values => _Values;
+
+    /// <summary>
+    /// Offers operation onver Client Events.
+    /// </summary>
     public ClientEventsHandler ClientEvents => _ClientEvents;
 
+    /// <summary>
+    /// True if SimConnect is opened. False otherwise.
+    /// </summary>
     public bool IsOpened { get => this.simConnect != null; }
 
     #endregion Properties
 
     #region Constructors
 
+    /// <summary>
+    /// Creates a new instance.
+    /// </summary>
     public ESimConnect()
     {
       logger = Logger.Create(nameof(ESimConnect));
@@ -168,6 +234,9 @@ namespace ESimConnect
 
     #region Methods
 
+    /// <summary>
+    /// Unregisters all definitions and close and dispose underlying simConnect object.
+    /// </summary>
     public void Close()
     {
       logger.LogMethodStart();
@@ -185,6 +254,7 @@ namespace ESimConnect
       logger.LogMethodEnd();
     }
 
+
     public void Dispose()
     {
       logger.LogMethodStart();
@@ -193,6 +263,9 @@ namespace ESimConnect
       GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Opens underlying simConnect object.
+    /// </summary>
     public void Open()
     {
       logger.LogMethodStart();
@@ -294,37 +367,7 @@ namespace ESimConnect
       ESimConnectDataReceivedEventArgs e = new(request.RequestId, request.Type, content);
       this.DataReceived?.Invoke(this, e);
     }
-
-    private void Try(Action tryAction, Func<Exception, Exception> exceptionProducer)
-    {
-      try
-      {
-        tryAction.Invoke();
-      }
-      catch (Exception ex)
-      {
-        Exception newException = exceptionProducer.Invoke(ex);
-        logger.LogException(newException);
-        throw newException;
-      }
-    }
-
-    private T Try<T>(Func<T> tryFunc, Func<Exception, Exception> exceptionProducer)
-    {
-      T ret;
-      try
-      {
-        ret = tryFunc.Invoke();
-      }
-      catch (Exception ex)
-      {
-        Exception newException = exceptionProducer.Invoke(ex);
-        logger.LogException(newException);
-        throw newException;
-      }
-      return ret;
-    }
-
+    
     private static void ValidateSimVarName(string simVarName)
     {
       string unindexSimVarName(string simVarName)
@@ -354,7 +397,8 @@ namespace ESimConnect
         }
 
         return ret;
-      };
+      }
+      ;
 
       string tmp = unindexSimVarName(simVarName);
       bool exists = findSimVar(tmp);

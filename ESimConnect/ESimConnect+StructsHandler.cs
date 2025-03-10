@@ -5,21 +5,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using static ESimConnect.Types.RequestsManager;
+using static ESystem.Functions.TryCatch;
 
 namespace ESimConnect
 {
-    public partial class ESimConnect
+  public partial class ESimConnect
   {
+    /// <summary>
+    /// Offers operations over structs.
+    /// </summary>
     public class StructsHandler : BaseHandler
     {
-      private const uint DEFAULT_RADIUS = 0;
-      private const SimConnectSimObjectType DEFAULT_SIMOBJECT_TYPE = SimConnectSimObjectType.USER;
+      /// <summary>
+      /// Default radius. As typical requests are related to the current user/plane, default value is 0.
+      /// </summary>
+      public const uint DEFAULT_RADIUS = 0;
+      /// <summary>
+      /// Default sim object type. As typical request are related to the current user/plane, default value is USER.
+      /// </summary>
+      public const SimConnectSimObjectType DEFAULT_SIMOBJECT_TYPE = SimConnectSimObjectType.USER;
       private readonly TypeManager typeManager = new();
 
-      public StructsHandler(ESimConnect parent) : base(parent)
+      internal StructsHandler(ESimConnect parent) : base(parent)
       {
       }
 
+      /// <summary>
+      /// Registers a type with fields to get values from FS.
+      /// </summary>
+      /// <typeparam name="T">Registerd type</typeparam>
+      /// <param name="validate">True if SimVar names should be validated.</param>
+      /// <returns>TypeId uniquely referring registered type.</returns>
       public TypeId Register<T>(bool validate = false) where T : struct
       {
         logger.LogMethodStart();
@@ -34,14 +50,14 @@ namespace ESimConnect
         foreach (var fieldInfo in fieldInfos)
         {
           if (validate) ValidateSimVarName(fieldInfo.Name);
-          parent.Try(() =>
+          Try(() =>
             this.parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(),
               fieldInfo.Name, fieldInfo.Unit, fieldInfo.Type,
               epsilon, SimConnect.SIMCONNECT_UNUSED),
             ex => new InternalException("Failed to invoke 'simConnect.AddToDataDefinition(...)'.", ex));
         }
 
-        parent.Try(() => this.parent.simConnect!.RegisterDataDefineStruct<T>(typeId.ToEEnum()),
+        Try(() => this.parent.simConnect!.RegisterDataDefineStruct<T>(typeId.ToEEnum()),
           ex => new InternalException("Failed to invoke 'simConnect.RegisterDataDefineStruct<T>(...)'.", ex));
         this.typeManager.Register(typeId, t);
         logger.LogMethodEnd();
@@ -49,6 +65,14 @@ namespace ESimConnect
         return typeId;
       }
 
+      /// <summary>
+      /// Requests a data w.r.t. the registered type
+      /// </summary>
+      /// <typeparam name="T">Target type, must be already registered with assigned TypeId.</typeparam>
+      /// <param name="radius">Radius of data request.</param>
+      /// <param name="simObjectType">SimObject related to the requested data.</param>
+      /// <returns>RequestId uniquely describing the request. Data are returned via event with the same RequestId.</returns>
+      /// <exception cref="InternalException">If any issue occurs.</exception>
       public RequestId Request<T>(uint radius = DEFAULT_RADIUS, SimConnectSimObjectType simObjectType = DEFAULT_SIMOBJECT_TYPE)
       {
         TypeId typeId = typeManager.GetByTypeSingle(typeof(T));
@@ -56,6 +80,14 @@ namespace ESimConnect
         return ret;
       }
 
+      /// <summary>
+      /// Requests a data w.r.t. the registered type
+      /// </summary>
+      /// <param name="typeId">Previously registered TypeId</param>
+      /// <param name="radius">Radius of data request.</param>
+      /// <param name="simObjectType">SimObject realted to the requested data.</param>
+      /// <returns>RequestId uniquely describing the request. Data are returned via event with the same RequestId.</returns>
+      /// <exception cref="InternalException">If any issue occurs.</exception>
       public RequestId Request(TypeId typeId, uint radius = DEFAULT_RADIUS, SimConnectSimObjectType simObjectType = DEFAULT_SIMOBJECT_TYPE)
       {
         logger.LogMethodStart(new object?[] { radius, simObjectType });
@@ -65,7 +97,7 @@ namespace ESimConnect
         Type type = typeManager[typeId];
         SIMCONNECT_SIMOBJECT_TYPE simConObjectType = EnumConverter.Convert<SimConnectSimObjectType, SIMCONNECT_SIMOBJECT_TYPE>(simObjectType);
 
-        parent.Try(() => this.parent.simConnect!.RequestDataOnSimObjectType(requestId.ToEEnum(), typeId.ToEEnum(), radius, simConObjectType),
+        Try(() => this.parent.simConnect!.RequestDataOnSimObjectType(requestId.ToEEnum(), typeId.ToEEnum(), radius, simConObjectType),
           ex => throw new InternalException("Failed to invoke 'RequestDataOnSimObjectType(...)'.", ex));
 
         this.parent.requestDataManager.RegisterRequest(requestId, type, typeId, KindOfTypeId.STRUCT);
@@ -118,7 +150,7 @@ namespace ESimConnect
 
         SIMCONNECT_PERIOD simConPeriod = EnumConverter.Convert<SimConnectPeriod, SIMCONNECT_PERIOD>(period);
 
-        parent.Try(() =>
+        Try(() =>
           this.parent.simConnect.RequestDataOnSimObject(
             requestId.ToEEnum(), typeId.ToEEnum(), SimConnect.SIMCONNECT_OBJECT_ID_USER, simConPeriod,
             flag, (uint)initialDelayFrames, (uint)skipBetweenFrames, (uint)numberOfReturnedFrames),
@@ -171,7 +203,7 @@ namespace ESimConnect
 
         foreach (var typeId in typeIds)
         {
-          parent.Try(
+          Try(
           () => this.parent.simConnect!.ClearDataDefinition(typeId.ToEEnum()),
           ex => new InternalException($"Failed to unregister typeId '{typeId}' / type '{typeManager[typeId].FullName}'.", ex));
         }

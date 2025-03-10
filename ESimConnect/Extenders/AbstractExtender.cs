@@ -8,14 +8,21 @@ using System.Windows.Media.Animation;
 
 namespace ESimConnect.Extenders
 {
+  /// <summary>
+  /// Abstract class for extenders.
+  /// </summary>
   public abstract class AbstractExtender
   {
     protected readonly ESimConnect eSimCon;
 
-    public AbstractExtender(ESimConnect eSimCon)
+    /// <summary>
+    /// Creates a new instance.
+    /// </summary>
+    /// <param name="eSimConnect">ESimConnect instance, cannot be null.</param>
+    public AbstractExtender(ESimConnect eSimConnect)
     {
-      EAssert.Argument.IsNotNull(eSimCon, nameof(eSimCon));
-      this.eSimCon = eSimCon;
+      EAssert.Argument.IsNotNull(eSimConnect, nameof(eSimConnect));
+      this.eSimCon = eSimConnect;
     }
   }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using ESimConnect.Definitions;
+using static ESystem.Functions.TryCatch;
 
 namespace ESimConnect
 {
@@ -13,7 +14,7 @@ namespace ESimConnect
     {
       private readonly EEnum GROUP_ID_PRIORITY_STANDARD = (EEnum)1900000000;
 
-      public ClientEventsHandler(ESimConnect parent) : base(parent)
+      internal ClientEventsHandler(ESimConnect parent) : base(parent)
       {
       }
 
@@ -40,7 +41,7 @@ namespace ESimConnect
         this.parent.simConnect!.MapClientEventToSimEvent(eEvent, eventName);
 
         uint val = parameters.Length == 0 ? 0 : parameters[0];
-        this.parent.Try(() =>
+        Try(() =>
           this.parent.simConnect.TransmitClientEvent(
           SimConnect.SIMCONNECT_OBJECT_ID_USER, eEvent, val, GROUP_ID_PRIORITY_STANDARD, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY),
           ex => new InternalException($"Failed to invoke 'TransmitClientEvent(...)'", ex));

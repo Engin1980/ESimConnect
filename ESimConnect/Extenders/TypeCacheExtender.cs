@@ -8,6 +8,15 @@ using System.Threading.Tasks;
 
 namespace ESimConnect.Extenders
 {
+  /// <summary>
+  /// Extender to register all properties as SimVars in class and return its values on request.
+  /// </summary>
+  /// <remarks>
+  /// The point is to have a class with properties annotated with <see cref="SimPropertyAttribute"/>
+  /// For every property, this attribute defines its mapping to SimVar.
+  /// Once such type is registered, the call of <see cref="GetSnapshost{T}">GetSnapshot()</see> will 
+  /// fill/return and instance with current SimVar data in properties. />
+  /// </remarks>
   public class TypeCacheExtender
   {
     private readonly object lck = new();
@@ -15,17 +24,29 @@ namespace ESimConnect.Extenders
     private readonly Dictionary<PropertyInfo, TypeId> props = new();
     private readonly HashSet<Type> types = new();
 
+    /// <summary>
+    /// Creates a new instance
+    /// </summary>
+    /// <param name="cache">Underyling <see cref="ValueCacheExtender"/>.</param>
     public TypeCacheExtender(ValueCacheExtender cache)
     {
       EAssert.Argument.IsNotNull(cache, nameof(cache));
       this.cache = cache;
     }
 
+    /// <summary>
+    /// Registers a class with <see cref="SimPropertyAttribute" /> annotated properties./>
+    /// </summary>
+    /// <typeparam name="T">Type to register.</typeparam>
     public void Register<T>()
     {
       this.Register(typeof(T));
     }
 
+    /// <summary>
+    /// Registers a class with <see cref="SimPropertyAttribute" /> annotated properties./>
+    /// </summary>
+    /// <param name="type">Type to register.</param>
     public void Register(Type type)
     {
       var tmp = type
@@ -45,6 +66,12 @@ namespace ESimConnect.Extenders
       }
     }
 
+    /// <summary>
+    /// Returns current values in new instance of registered type.
+    /// </summary>
+    /// <typeparam name="T">Registered type.</typeparam>
+    /// <returns>Snapshot of SimVar values in properties in a new instance.</returns>
+    /// <exception cref="TypeCacheExtenderException">Thows exception if type is not registered.</exception>
     public T GetSnapshost<T>() where T : new()
     {
       T ret = new();
@@ -52,6 +79,12 @@ namespace ESimConnect.Extenders
       return ret;
     }
 
+    /// <summary>
+    /// Sets current values into existing instance of registered type.
+    /// </summary>
+    /// <typeparam name="T">Registered type.</typeparam>
+    /// <param name="snapshot">Instace of registerd type.</param>
+    /// <exception cref="TypeCacheExtenderException">Thows exception if type is not registered.</exception>
     public void FillSnapshost<T>(T snapshot)
     {
       EAssert.Argument.IsNotNull(snapshot, nameof(snapshot));

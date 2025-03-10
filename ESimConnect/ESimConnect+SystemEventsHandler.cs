@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using static ESystem.Functions.TryCatch;
 
 namespace ESimConnect
 {
@@ -13,7 +14,7 @@ namespace ESimConnect
       private record EventIdName(EventId EventId, string EventName);
       private readonly List<EventIdName> registeredEvents = new();
 
-      public SystemEventsHandler(ESimConnect parent) : base(parent)
+      internal SystemEventsHandler(ESimConnect parent) : base(parent)
       {
       }
 
@@ -28,7 +29,7 @@ namespace ESimConnect
         if (eventId == null)
         {
           eventId = EventId.Next();
-          parent.Try(() =>
+          Try(() =>
           {
             this.parent.simConnect!.SubscribeToSystemEvent(eventId.Value.ToEEnum(), eventName);
             this.registeredEvents.Add(new EventIdName(eventId.Value, eventName));
@@ -43,7 +44,7 @@ namespace ESimConnect
       public void Unregister(EventId eventId)
       {
         var record = this.registeredEvents.FirstOrDefault(q => q.EventId == eventId) ?? throw new ESimConnectException($"EventId '{eventId}' not registered to any event.");
-        parent.Try(() =>
+        Try(() =>
         {
           this.parent.simConnect!.UnsubscribeFromSystemEvent(record.EventId.ToEEnum());
           this.registeredEvents.Remove(record);

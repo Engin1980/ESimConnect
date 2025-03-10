@@ -7,20 +7,40 @@ using System.Threading.Tasks;
 
 namespace ESimConnect.Extenders
 {
-  public class SimSecondElapsedExtender : AbstractExtender
+  /// <summary>
+  /// Provides event and states for Sim-Second-Elapsed and Paused.
+  /// </summary>
+  public class SimTimExtender : AbstractExtender
   {
+    /// <summary>
+    /// Returns True if sim is paused, false otherwise.
+    /// </summary>
     public bool IsSimPaused { get; set; }
+    /// <summary>
+    /// Invoked on every Sim Second Elapsed.
+    /// </summary>
     public event Action? SimSecondElapsed;
+
+    /// <summary>
+    /// Invoked on pause state change.
+    /// </summary>
+    public event Action<bool>? PauseChanged;
+
     private readonly bool invokeSimSecondEventsOnPause;
 
-    public SimSecondElapsedExtender(ESimConnect eSimCon, bool invokeSimSecondEventsOnPause) : base(eSimCon)
+    /// <summary>
+    /// Creates new instance
+    /// </summary>
+    /// <param name="eSimConnect">Underlying eSimConnect object.</param>
+    /// <param name="invokeSimSecondEventsOnPause">True if SimSecond should be invoked on pause, false otherwise.</param>
+    public SimTimExtender(ESimConnect eSimConnect, bool invokeSimSecondEventsOnPause) : base(eSimConnect)
     {
-      EAssert.Argument.IsNotNull(eSimCon, nameof(eSimCon));
+      EAssert.Argument.IsNotNull(eSimConnect, nameof(eSimConnect));
       base.eSimCon.SystemEventInvoked += SimCon_EventInvoked;
       this.invokeSimSecondEventsOnPause = invokeSimSecondEventsOnPause;
-      if (eSimCon.IsOpened) RegisterEvents();
+      if (eSimConnect.IsOpened) RegisterEvents();
       else
-        eSimCon.Connected += _ => RegisterEvents();
+        eSimConnect.Connected += _ => RegisterEvents();
     }
 
     private void RegisterEvents()
@@ -34,6 +54,7 @@ namespace ESimConnect.Extenders
       if (e.Event == Definitions.SimEvents.System.Pause)
       {
         IsSimPaused = e.Value != 0;
+        PauseChanged?.Invoke(IsSimPaused);
       }
       else if (e.Event == Definitions.SimEvents.System._1sec && (!IsSimPaused || invokeSimSecondEventsOnPause))
       {

@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace ESimConnect
 {
+  /// <summary>
+  /// Exceptions returned from MS.SimConnect. Taken from ms.simconnect documentation.
+  /// </summary>
   public enum SimConnectException
   {
     NONE,
@@ -49,6 +52,9 @@ namespace ESimConnect
     OBJECT_SCHEDULE
   }
 
+  ///<summary>
+  /// SimVar returned types from ms.simConnect. Taken from documentation.
+  /// </summary>
   public enum SimConnectSimTypeName
   {
     INVALID,
@@ -70,7 +76,10 @@ namespace ESimConnect
     XYZ,
     MAX
   }
-  
+
+  /// <summary>
+  /// SimVar SimObject type from ms.simConnect. Taken from documentation.
+  /// </summary>
   public enum SimConnectSimObjectType
   {
     USER,
@@ -81,6 +90,9 @@ namespace ESimConnect
     GROUND
   }
 
+  /// <summary>
+  /// SimVar Period returned from ms.simConnect. Taken from documentation.
+  /// </summary>
   public enum SimConnectPeriod
   {
     NEVER,

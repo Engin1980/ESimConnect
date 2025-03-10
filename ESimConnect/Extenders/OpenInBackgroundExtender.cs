@@ -10,6 +10,9 @@ using System.Timers;
 
 namespace ESimConnect.Extenders
 {
+  /// <summary>
+  /// Opens ESimConnect in background (in repeated attempts), invokes event once the opening is successfull.
+  /// </summary>
   public class OpenInBackgroundExtender : AbstractExtender
   {
     private const int OPENING_STATE_UNSET = 0;
@@ -23,17 +26,37 @@ namespace ESimConnect.Extenders
     private readonly Timer connectionTimer;
     private readonly HashSet<Action> onStartedActions = new();
 
+    /// <summary>
+    /// Invoked when ESimConnect is opened.
+    /// </summary>
     public event Action? Opened = null!;
+
+    /// <summary>
+    /// Invoked when one opening attempt did fail (will try to continue with other attempts.)
+    /// </summary>
     public event Action<Exception>? OpeningAttemptFailed = null!;
 
     private int openingStateFlag = OPENING_STATE_UNSET;
+
+    /// <summary>
+    /// True if ESimConnect is opened.
+    /// </summary>
     public bool IsOpened { get => openingStateFlag == OPENING_STATE_OPENED; }
+    /// <summary>
+    /// True if ESimConnect opening in background is in the progress.
+    /// </summary>
     public bool IsOpening { get => openingStateFlag == OPENING_STATE_OPENING; }
 
+    /// <summary>
+    /// Creates a new instance
+    /// </summary>
+    /// <param name="eSimConnect">Underlying ESimConnect object</param>
+    /// <param name="initialDelayInMs">Initial delay before first opening attempt.</param>
+    /// <param name="repeatedAttemptDelayInMs">Delay after unsuccessful attempt.</param>
     public OpenInBackgroundExtender(
-      ESimConnect eSimCon,
+      ESimConnect eSimConnect,
       int initialDelayInMs = INITIAL_CONNECTION_DELAY,
-      int repeatedAttemptDelayInMs = REPEATED_CONNECTION_DELAY) : base(eSimCon)
+      int repeatedAttemptDelayInMs = REPEATED_CONNECTION_DELAY) : base(eSimConnect)
     {
       EAssert.Argument.IsTrue(initialDelayInMs >= 0, nameof(initialDelayInMs), "Must be non-negative int.");
       EAssert.Argument.IsTrue(repeatedAttemptDelayInMs > 0, nameof(repeatedAttemptDelayInMs), "Must be positive int.");
@@ -83,6 +106,10 @@ namespace ESimConnect.Extenders
       }
     }
 
+    /// <summary>
+    /// Starts opening in background. Non-blocking call. If ESimConnect is opened, then event is invoked.
+    /// </summary>
+    /// <param name="onStarted">Additional content invoked after successfull open (alternating option to 'Opened' event).</param>
     public void OpenInBackground(Action? onStarted = null)
     {
       AddOnStartedIfRequired(onStarted);
