@@ -5,12 +5,13 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <PlatformTarget>x64</PlatformTarget>
-    <AssemblyVersion>1.3.0.0</AssemblyVersion>
-    <FileVersion>1.3.0.0</FileVersion>
+    <AssemblyVersion>1.3.0.2</AssemblyVersion>
+    <FileVersion>1.3.0.2</FileVersion>
     <Title>ESimConnect</Title>
     <Authors>Marek Vajgl</Authors>
     <Description>Simple library wrapping MS SimConnect for more friendly usage in C#.</Description>
     <PackageProjectUrl>https://github.com/Engin1980/ESimConnect</PackageProjectUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
