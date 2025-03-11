@@ -6,8 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PlatformTarget>x64</PlatformTarget>
-    <AssemblyVersion>1.3.0.2</AssemblyVersion>
-    <FileVersion>1.3.0.2</FileVersion>
+    <AssemblyVersion>1.4.0.0</AssemblyVersion>
+    <FileVersion>1.4.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,9 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="ELogging">
-      <HintPath>..\DLLs\ELogging.dll</HintPath>
-    </Reference>
     <Reference Include="ESystem">
       <HintPath>..\DLLs\ESystem.dll</HintPath>
     </Reference>

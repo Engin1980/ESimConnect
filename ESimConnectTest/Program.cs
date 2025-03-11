@@ -1,6 +1,6 @@
 ﻿using ESimConnectTest.Tests;
 using System.Windows.Threading;
-using ELogging;
+using ESystem.Logging;
 using System.Runtime.CompilerServices;
 
 bool useLogging = true;
