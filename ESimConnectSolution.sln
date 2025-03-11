@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESimConnectSimVarStruct", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeCacheExtenderExample", "Tutorials\TypeCacheExtenderExample\TypeCacheExtenderExample.csproj", "{23D67489-0988-4EB6-8E21-D240F431AC2E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenAndSimTimeExtendersExample", "Tutorials\OpenAndSimTimeExtendersExample\OpenAndSimTimeExtendersExample.csproj", "{B4FF5318-3EF2-4C13-A2DC-D59750E41A46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{23D67489-0988-4EB6-8E21-D240F431AC2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23D67489-0988-4EB6-8E21-D240F431AC2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23D67489-0988-4EB6-8E21-D240F431AC2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4FF5318-3EF2-4C13-A2DC-D59750E41A46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4FF5318-3EF2-4C13-A2DC-D59750E41A46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4FF5318-3EF2-4C13-A2DC-D59750E41A46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4FF5318-3EF2-4C13-A2DC-D59750E41A46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 		{668DC7EF-4ECA-4E1A-89F3-7793A2EC3A9F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{630A58DC-1B43-4AC5-8EA3-5D880D225AB4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{23D67489-0988-4EB6-8E21-D240F431AC2E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{B4FF5318-3EF2-4C13-A2DC-D59750E41A46} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E1CEC6B8-45BC-4B0C-98ED-A0B48A9D3EA7}

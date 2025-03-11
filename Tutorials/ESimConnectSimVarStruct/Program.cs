@@ -20,7 +20,7 @@ simCon.DataReceived += SimCon_DataReceived;
 // or documentation at: https://docs.flightsimulator.com/html/Programming_Tools/SimVars/Simulation_Variables.htm
 typeId = simCon.Structs.Register<CommonDataStruct>();
 
-bool readOnce = true;
+bool readOnce = false;
 if (readOnce)
 {
   requestId = simCon.Structs.Request<CommonDataStruct>();
@@ -29,9 +29,6 @@ else
 {
   requestId = simCon.Structs.RequestRepeatedly<CommonDataStruct>(SimConnectPeriod.SECOND, true);
 }
-
-// wait for some time
-Thread.Sleep(30000);
 
 // this function will be invoked on new incoming data
 void SimCon_DataReceived(ESimConnect.ESimConnect sender, ESimConnect.ESimConnect.ESimConnectDataReceivedEventArgs e)

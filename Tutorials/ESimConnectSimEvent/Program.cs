@@ -6,7 +6,6 @@ using ESimConnect;
 // this variable will later hold the id of registered event
 EventId? registeredEventId = null;
 
-
 // create instance & open the connection
 ESimConnect.ESimConnect simCon = new();
 simCon.Open();
@@ -19,9 +18,6 @@ simCon.SystemEventInvoked += SimCon_SystemEventInvoked;
 // or documentation at: https://docs.flightsimulator.com/html/Programming_Tools/Event_IDs/Event_IDs.htm
 registeredEventId = simCon.SystemEvents.Register(ESimConnect.Definitions.SimEvents.System._1sec, false);
 
-
-// wait for some time
-Thread.Sleep(30000);
 
 // this function will be invoked on every incoming system event
 void SimCon_SystemEventInvoked(

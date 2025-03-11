@@ -25,9 +25,6 @@ typeCache.Register<SimDataSnapshot>();
 // listen for every sim-elapsed second
 simTimeExtender.SimSecondElapsed += SimTimeExtender_SimSecondElapsed;
 
-// wait for some time
-Thread.Sleep(30000);
-
 // invoked on every sim-second
 void SimTimeExtender_SimSecondElapsed()
 {

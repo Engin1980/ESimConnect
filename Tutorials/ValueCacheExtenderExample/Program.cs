@@ -23,6 +23,9 @@ valueCache.ValueChanged += ValueCache_ValueChanged;
 openInBackgroundExtender.OpenInBackground(onConnected);
 
 
+Thread.Sleep(30000);
+
+
 // this will run once the connection is established
 void onConnected()
 {
@@ -32,6 +35,8 @@ void onConnected()
     "Knots", 
     SimConnectSimTypeName.FLOAT64);
 
+  Thread.Sleep(1000);
+
   // endless loop to read and print the value
   while (true)
   {
@@ -40,9 +45,6 @@ void onConnected()
     Thread.Sleep(1000);
   }
 }
-
-// wait for some time
-Thread.Sleep(30000);
 
 // this function will be invoked on new incoming data
 void ValueCache_ValueChanged(ESimConnect.Extenders.ValueCacheExtender.ValueChangeEventArgs e)

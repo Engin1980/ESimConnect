@@ -19,7 +19,7 @@ simCon.DataReceived += SimCon_DataReceived;
 // or documentation at: https://docs.flightsimulator.com/html/Programming_Tools/SimVars/Simulation_Variables.htm
 typeId = simCon.Values.Register<double>(ESimConnect.Definitions.SimVars.Aircraft.Miscelaneous.PLANE_ALTITUDE);
 
-bool readOnce = true;
+bool readOnce = false;
 if (readOnce)
 {
   requestId = simCon.Values.Request(typeId.Value);
@@ -29,8 +29,6 @@ else
   requestId = simCon.Values.RequestRepeatedly(typeId.Value, SimConnectPeriod.SECOND, true);
 }
 
-// wait for some time
-Thread.Sleep(30000);
 
 // this function will be invoked on every incoming data
 void SimCon_DataReceived(ESimConnect.ESimConnect sender, ESimConnect.ESimConnect.ESimConnectDataReceivedEventArgs e)
