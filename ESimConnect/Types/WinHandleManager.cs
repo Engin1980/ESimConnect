@@ -67,6 +67,7 @@ namespace ESimConnect.Types
           logger.Log(LogLevel.TRACE, "DefWndProc");
           try
           {
+            //TODO is it possible check here somehow that _Close_ event was invoked previously on SimConnect?
             this._SimConnect.ReceiveMessage();
           }
           catch (Exception ex)

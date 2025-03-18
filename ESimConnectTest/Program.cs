@@ -2,6 +2,7 @@
 using System.Windows.Threading;
 using ESystem.Logging;
 using System.Runtime.CompilerServices;
+using ESimConnectTest.Tests.ValueCacheExtender;
 
 bool useLogging = true;
 string LOG_FILE_NAME = "_log.txt";
@@ -13,6 +14,7 @@ useLogging = true;
 //StructsTest.Run();
 //ClientEventsTest.Run();
 //SystemEventsTest.Run();
+IgnoreForeignRegistrationTest.Run();
 
 useLogging = false;
 
