@@ -105,7 +105,7 @@ namespace ESimConnect.Extenders
     /// Returns all values of all registered SimVars.
     /// </summary>
     /// <returns>SimVar infos + values in list.</returns>
-    public List<SimVarValue> GetAllValues() 
+    public List<SimVarValue> GetAllValues()
       => types.Select(q => new SimVarValue(q.Key, TryGetValue(q.Value, double.NaN))).ToList();
 
     /// <summary>
@@ -122,10 +122,12 @@ namespace ESimConnect.Extenders
 
     private void ESimCon_DataReceived(ESimConnect _, ESimConnect.ESimConnectDataReceivedEventArgs e)
     {
-      TypeId typeId = requests[e.RequestId];
-      double value = (double)e.Data;
-      values[typeId] = value;
-      this.ValueChanged?.Invoke(new ValueChangeEventArgs(typeId, value));
+      if (!requests.TryGetValue(e.RequestId, out TypeId typeId))
+      {
+        double value = (double)e.Data;
+        values[typeId] = value;
+        this.ValueChanged?.Invoke(new ValueChangeEventArgs(typeId, value));
+      }
     }
 
     private void RequestRepeatedlyIfRequired(TypeId typeId)
