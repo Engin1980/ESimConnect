@@ -122,7 +122,7 @@ namespace ESimConnect.Extenders
 
     private void ESimCon_DataReceived(ESimConnect _, ESimConnect.ESimConnectDataReceivedEventArgs e)
     {
-      if (!requests.TryGetValue(e.RequestId, out TypeId typeId))
+      if (requests.TryGetValue(e.RequestId, out TypeId typeId))
       {
         double value = (double)e.Data;
         values[typeId] = value;

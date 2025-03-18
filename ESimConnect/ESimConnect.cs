@@ -175,7 +175,7 @@ namespace ESimConnect
     private readonly SystemEventsHandler _SystemEvents;
     private readonly ValuesHandler _Values;
     private readonly ClientEventsHandler _ClientEvents;
-    private readonly WinHandleManager winHandleManager = new();
+    private readonly WinHandleManager winHandleManager;
     private SimConnect? simConnect;
     private readonly Logger logger;
     #endregion Fields
@@ -220,7 +220,8 @@ namespace ESimConnect
 
       logger.LogMethodStart();
 
-      winHandleManager.FsExitDetected += (() => ResolveExitedFS2020());
+      this.winHandleManager = new(this);
+      this.winHandleManager.FsExitDetected += (() => ResolveExitedFS2020());
 
       this._SystemEvents = new(this);
       this._Structs = new(this);

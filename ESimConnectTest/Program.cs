@@ -18,7 +18,7 @@ IgnoreForeignRegistrationTest.Run();
 
 useLogging = false;
 
-RegisterUnregisterTest.Run();
+//RegisterUnregisterTest.Run();
 
 void SetUpLogging()
 {
@@ -29,6 +29,7 @@ void SetUpLogging()
   {
     if (!useLogging) return;
     string s = $"{DateTime.Now:yyyy-MM-dd-HH-mm-ss-fff}  {q.Sender,-25}  {q.Message}\n";
+    Console.WriteLine(s);
     File.AppendAllText(LOG_FILE_NAME, s);
   },
   new List<LogRule>() { new(".+", LogLevel.TRACE) });

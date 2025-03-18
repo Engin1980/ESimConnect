@@ -17,6 +17,7 @@ namespace ESimConnectTest.Tests.ValueCacheExtender
     private static TypeId typeId;
     private static RequestId requestId;
     private static int dataCounter;
+    private const int MAX_DATA_COUNTER = 10;
     internal static void Run()
     {
       logger.Log(LogLevel.INFO, "Starting");
@@ -31,7 +32,13 @@ namespace ESimConnectTest.Tests.ValueCacheExtender
 
       logger.Log(LogLevel.INFO, "Opening in background");
       openInBackgroundExtender.OpenInBackground();
-      logger.Log(LogLevel.INFO, "End of main thread, waiting for the rest.");
+      logger.Log(LogLevel.INFO, "Waiting for end.");
+
+      while (dataCounter < MAX_DATA_COUNTER)
+      {
+        Thread.Sleep(1000);
+      }
+      logger.Log(LogLevel.INFO, "End");
     }
 
     private static void ValueCacheExtender_ValueChanged(ESimConnect.Extenders.ValueCacheExtender.ValueChangeEventArgs obj)
@@ -51,7 +58,7 @@ namespace ESimConnectTest.Tests.ValueCacheExtender
       }
       dataCounter++;
 
-      if (dataCounter > 10)
+      if (dataCounter > MAX_DATA_COUNTER)
       {
         logger.Log(LogLevel.INFO, "If not crashed, working fine.");
         logger.Log(LogLevel.INFO, "Closing");
@@ -64,7 +71,7 @@ namespace ESimConnectTest.Tests.ValueCacheExtender
       logger.Log(LogLevel.INFO, "Opened");
 
       typeId = eSimCon.Values.Register<double>(ESimConnect.Definitions.SimVars.Aircraft.Miscelaneous.ACCELERATION_BODY_X);
-      requestId = eSimCon.Values.RequestRepeatedly(typeId, SimConnectPeriod.SECOND);
+      requestId = eSimCon.Values.RequestRepeatedly(typeId, SimConnectPeriod.SECOND, sendOnlyOnChange:false);
     }
   }
 }

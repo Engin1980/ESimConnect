@@ -1,4 +1,5 @@
-﻿using ESystem.Logging;
+﻿using ESystem.Asserting;
+using ESystem.Logging;
 using Microsoft.FlightSimulator.SimConnect;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,10 @@ namespace ESimConnect.Types
     private HwndSourceHook? hook = null;
     private SimConnect? _SimConnect = null;
     private readonly Logger logger = Logger.Create(nameof(WinHandleManager));
+    private readonly ESimConnect parent;
+    private bool isParentDisconnected = false;
     public SimConnect? SimConnect { get => _SimConnect; set => _SimConnect = value; }
+
 
     public delegate void FsExitDetectedDelegate();
     public event FsExitDetectedDelegate? FsExitDetected;
@@ -44,6 +48,13 @@ namespace ESimConnect.Types
           throw new InvalidRequestException("Cannot get win-handle when window is not created.");
         return windowHandle;
       }
+    }
+
+    public WinHandleManager(ESimConnect parent)
+    {
+      EAssert.Argument.IsNotNull(parent, nameof(parent));
+      this.parent = parent;
+      this.parent.Disconnected += (s) => this.isParentDisconnected = true;
     }
 
     public void Acquire()
@@ -65,25 +76,32 @@ namespace ESimConnect.Types
         if (this._SimConnect != null && this.hwndSource != null)
         {
           logger.Log(LogLevel.TRACE, "DefWndProc");
-          try
+          if (this.isParentDisconnected)
           {
-            //TODO is it possible check here somehow that _Close_ event was invoked previously on SimConnect?
-            this._SimConnect.ReceiveMessage();
+            logger.Log(LogLevel.WARNING, "Parent ESimConnect already disconnected. Ignoring message.");
+            return (IntPtr)0;
           }
-          catch (Exception ex)
+          else
           {
-            if (ex is System.Runtime.InteropServices.COMException && ex.Message == "0xC00000B0")
+            try
             {
-              FsExitDetected?.Invoke();
+              this._SimConnect.ReceiveMessage();
             }
-            else
+            catch (Exception ex)
             {
-              string s = ExpandExceptionString(ex);
-              Logger.Log(this, LogLevel.ERROR, "DefWndProc EXCEPTION " + s);
-              this.ExceptionRaised?.Invoke(ex);
+              if (ex is System.Runtime.InteropServices.COMException && ex.Message == "0xC00000B0")
+              {
+                FsExitDetected?.Invoke();
+              }
+              else
+              {
+                string s = ExpandExceptionString(ex);
+                Logger.Log(this, LogLevel.ERROR, "DefWndProc EXCEPTION " + s);
+                this.ExceptionRaised?.Invoke(ex);
+              }
             }
+            handled = true;
           }
-          handled = true;
         }
       }
       return (IntPtr)0;
