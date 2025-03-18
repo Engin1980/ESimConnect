@@ -102,8 +102,8 @@ namespace ESimConnectTest.Tests
     private static void ESimCon_DataReceived(ESimConnect.ESimConnect sender, ESimConnect.ESimConnect.ESimConnectDataReceivedEventArgs e)
     {
       string relatedSimVar;
-      if (onceRequestId.TryGetValue(e.RequestId, out relatedSimVar!) == false)
-        if (repeatedRequestId.TryGetValue(e.RequestId, out relatedSimVar!) == false)
+      if (onceRequestId.TryGetValue(e.RequestId, out relatedSimVar!) == false
+        && repeatedRequestId.TryGetValue(e.RequestId, out relatedSimVar!) == false)
           relatedSimVar = "??-unrecognized-simvar-??";
       Console.WriteLine($"ESimCon - DataReceived - requestId={e.RequestId}, simVar={relatedSimVar}, type={e.Type}, data={e.Data}");
     }

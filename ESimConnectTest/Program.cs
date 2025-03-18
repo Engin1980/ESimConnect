@@ -14,7 +14,8 @@ useLogging = true;
 //StructsTest.Run();
 //ClientEventsTest.Run();
 //SystemEventsTest.Run();
-IgnoreForeignRegistrationTest.Run();
+//IgnoreForeignRegistrationTest.Run();
+StringTest.Run();
 
 useLogging = false;
 
@@ -29,7 +30,7 @@ void SetUpLogging()
   {
     if (!useLogging) return;
     string s = $"{DateTime.Now:yyyy-MM-dd-HH-mm-ss-fff}  {q.Sender,-25}  {q.Message}\n";
-    Console.WriteLine(s);
+    Console.Write(s);
     File.AppendAllText(LOG_FILE_NAME, s);
   },
   new List<LogRule>() { new(".+", LogLevel.TRACE) });

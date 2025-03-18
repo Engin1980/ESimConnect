@@ -166,14 +166,12 @@ namespace ESimConnect
 
     #region Fields
 
-    // private const uint SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_CHANGED = 0x00000001; // TODO delete if not used
-    // private const uint SIMCONNECT_CLIENTDATAOFFSET_AUTO = uint.MaxValue;
-    // private const uint SIMCONNECT_GROUP_PRIORITY_HIGHEST = 1;
     private readonly RequestsManager requestDataManager = new();
     private readonly RequestExceptionManager requestExceptionManager = new();
     private readonly StructsHandler _Structs;
     private readonly SystemEventsHandler _SystemEvents;
     private readonly ValuesHandler _Values;
+    private readonly StringsHandler _Strings;
     private readonly ClientEventsHandler _ClientEvents;
     private readonly WinHandleManager winHandleManager;
     private SimConnect? simConnect;
@@ -196,6 +194,11 @@ namespace ESimConnect
     /// Offers operations over SimVars.
     /// </summary>
     public ValuesHandler Values => _Values;
+
+    /// <summary>
+    /// Offers operations over Strings.
+    /// </summary>
+    public StringsHandler Strings => _Strings;
 
     /// <summary>
     /// Offers operation onver Client Events.
@@ -227,6 +230,7 @@ namespace ESimConnect
       this._Structs = new(this);
       this._ClientEvents = new(this);
       this._Values = new(this);
+      this._Strings = new(this);
 
       logger.LogMethodEnd();
     }
@@ -245,6 +249,7 @@ namespace ESimConnect
       {
         this.Structs.UnregisterAll();
         this.Values.UnregisterAll();
+        this.Strings.UnregisterAll();
         this.SystemEvents.UnregisterAll();
 
         this.winHandleManager.Dispose();
@@ -364,6 +369,7 @@ namespace ESimConnect
       RequestId requestId = new((int)data.dwRequestID);
       var request = this.requestDataManager.GetByRequestId(requestId);
       object content = data.dwData[0];
+      content = this._Strings.UnpackValueIfIsStringContent(content);
 
       ESimConnectDataReceivedEventArgs e = new(request.RequestId, request.Type, content);
       this.DataReceived?.Invoke(this, e);

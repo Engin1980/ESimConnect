@@ -1,12 +1,17 @@
 ﻿using ESimConnect.Definitions;
 using ESimConnect.Types;
+using ESystem.Logging;
 using Microsoft.FlightSimulator.SimConnect;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using ESystem.Exceptions;
+using static ESimConnect.ESimConnect;
 using static ESimConnect.Types.RequestsManager;
 using static ESystem.Functions.TryCatch;
 
@@ -14,39 +19,104 @@ namespace ESimConnect
 {
   public partial class ESimConnect
   {
-    public class ValuesHandler : BaseHandler
+    public class StringsHandler : BaseHandler
     {
+      public enum StringLength
+      {
+        _8,
+        _32,
+        _128,
+        _260
+      }
+
+      [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+      private struct String8Struct
+      {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 8)]
+        public string value;
+      }
+
+      [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+      private struct String32Struct
+      {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string value;
+      }
+
+      [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+      private struct String128Struct
+      {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string value;
+      }
+
+      [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+      private struct String260Struct
+      {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+        public string value;
+      }
+
       private const uint DEFAULT_RADIUS = 0;
       private const SimConnectSimObjectType DEFAULT_SIMOBJECT_TYPE = SimConnectSimObjectType.USER;
       private readonly TypeManager typeManager = new();
 
-      internal ValuesHandler(ESimConnect parent) : base(parent)
+      internal StringsHandler(ESimConnect parent) : base(parent)
       {
       }
 
-      public TypeId Register<T>(string simVarName, string unit = "Number", SimConnectSimTypeName simTypeName = SimConnectSimTypeName.FLOAT64,
-        int epsilon = 0, bool validate = false)
+      public TypeId Register(string simVarName, StringLength length, int epsilon = 0, bool validate = false)
       {
         logger.LogMethodStart();
         parent.EnsureConnected();
 
-        SIMCONNECT_DATATYPE simType = EnumConverter.Convert<SimConnectSimTypeName, SIMCONNECT_DATATYPE>(simTypeName);
+        if (validate) ValidateSimVarName(simVarName);
 
         TypeId typeId = TypeId.Next();
 
-        if (validate) ValidateSimVarName(simVarName);
+        Action dataDef;
+        Action structDef;
+        Type stringType;
 
-        Try(
-          () => parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(), simVarName, unit, simType, epsilon, SimConnect.SIMCONNECT_UNUSED),
-          ex => new InternalException("Failed to invoke 'simConnect.AddToDataDefinition(...)'.", ex));
+        switch (length)
+        {
+          case StringLength._8:
+            dataDef = () => this.parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(),
+              simVarName, "", SIMCONNECT_DATATYPE.STRING8, 0, SimConnect.SIMCONNECT_UNUSED);
+            structDef = () => this.parent.simConnect!.RegisterDataDefineStruct<String8Struct>(typeId.ToEEnum());
+            stringType = typeof(String8Struct);
+            break;
+          case StringLength._32:
+            dataDef = () => this.parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(),
+              simVarName, "", SIMCONNECT_DATATYPE.STRING8, 0, SimConnect.SIMCONNECT_UNUSED);
+            structDef = () => this.parent.simConnect!.RegisterDataDefineStruct<String32Struct>(typeId.ToEEnum());
+            stringType = typeof(String32Struct);
+            break;
+          case StringLength._128:
+            dataDef = () => this.parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(),
+              simVarName, "", SIMCONNECT_DATATYPE.STRING128, 0, SimConnect.SIMCONNECT_UNUSED);
+            structDef = () => this.parent.simConnect!.RegisterDataDefineStruct<String128Struct>(typeId.ToEEnum());
+            stringType = typeof(String128Struct);
+            break;
+          case StringLength._260:
+            dataDef = () => this.parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(),
+            simVarName, "", SIMCONNECT_DATATYPE.STRING260, 0, SimConnect.SIMCONNECT_UNUSED);
+            structDef = () => this.parent.simConnect!.RegisterDataDefineStruct<String260Struct>(typeId.ToEEnum());
+            stringType = typeof(String260Struct);
+            break;
+          default:
+            throw new UnexpectedEnumValueException(length);
+        }
 
-        Try(
-          () => parent.simConnect!.RegisterDataDefineStruct<T>(typeId.ToEEnum()),
+        Try(dataDef,
+            ex => new InternalException("Failed to invoke 'simConnect.AddToDataDefinition(...)'.", ex));
+
+        Try(structDef,
           ex => new InternalException("Failed to invoke 'simConnect.RegisterDataDefineStruct<T>(...)'.", ex));
 
-        this.typeManager.Register(typeId, typeof(T));
-
+        this.typeManager.Register(typeId, stringType);
         logger.LogMethodEnd();
+
         return typeId;
       }
 
@@ -103,22 +173,6 @@ namespace ESimConnect
         logger.LogMethodEnd();
       }
 
-
-      public void Send<T>(TypeId typeId, T value)
-      {
-        logger.LogMethodStart();
-        parent.EnsureConnected();
-        if (value == null) throw new ArgumentNullException(nameof(value));
-
-        Type expectedType = this.typeManager[typeId];
-        if (value.GetType().Equals(expectedType) == false)
-          throw new ApplicationException($"Primitive type should be {expectedType.Name}, but provided value {value} is {value.GetType().Name}.");
-
-        parent.simConnect!.SetDataOnSimObject(typeId.ToEEnum(), SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, value);
-
-        logger.LogMethodEnd();
-      }
-
       public void Unregister(TypeId typeId, int? unergistrationDelayMs = null)
       {
         logger.LogMethodStart();
@@ -167,12 +221,20 @@ namespace ESimConnect
         UnregisterInternal(primitiveTypeIds, unergistrationDelayMs);
       }
 
-      [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
-      private struct String32Struct
+      internal object UnpackValueIfIsStringContent(object content)
       {
-        [DataDefinition(SimVars.Aircraft.RadioAndNavigation.ATC_ID)]
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        public string value;
+        object ret;
+        if (content is String8Struct s8)
+          ret = s8.value;
+        else if (content is String32Struct s32)
+          ret = s32.value;
+        else if (content is String128Struct s128)
+          ret = s128.value;
+        else if (content is String260Struct s260)
+          ret = s260.value;
+        else
+          ret = content;
+        return ret;
       }
     }
   }
