@@ -9,7 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESimConnectTest", "ESimConn
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DLLs", "DLLs", "{95F4DEB8-6FA6-464A-8EA6-8DB8439D4BA3}"
 	ProjectSection(SolutionItems) = preProject
-		DLLs\ELogging.dll = DLLs\ELogging.dll
 		DLLs\ESystem.dll = DLLs\ESystem.dll
 		DLLs\Microsoft.FlightSimulator.SimConnect.dll = DLLs\Microsoft.FlightSimulator.SimConnect.dll
 		DLLs\SimConnect.dll = DLLs\SimConnect.dll

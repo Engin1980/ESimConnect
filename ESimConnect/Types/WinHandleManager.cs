@@ -88,14 +88,17 @@ namespace ESimConnect.Types
       return (IntPtr)0;
     }
 
-    private static string ExpandExceptionString(Exception ex)
+    private static string ExpandExceptionString(Exception? ex)
     {
       List<string> tmp = new();
       while (ex != null)
       {
         StringBuilder sb = new();
-        sb.Append("\n\t");
-        sb.Append(ex.StackTrace ?? "");
+        sb.Append(ex.Message)
+          .Append("\n\t")
+          .Append(ex.StackTrace ?? "");
+        tmp.Add(sb.ToString());
+        ex = ex.InnerException;
       }
       string ret = string.Join("\n\n", tmp);
       return ret;
@@ -127,7 +130,8 @@ namespace ESimConnect.Types
         }
         this.window = null;
         this.windowHandle = IntPtr.Zero;
-      };
+      }
+      ;
 
       if (Application.Current == null)
         destroyWindowHandle();
@@ -148,7 +152,8 @@ namespace ESimConnect.Types
         wih.EnsureHandle();
         this.windowHandle = new WindowInteropHelper(window).Handle;
         this.window = window;
-      };
+      }
+      ;
 
       if (Application.Current == null)
       {
