@@ -115,8 +115,9 @@ namespace ESimConnect.Extenders
     /// <returns>Current value of SimVars</returns>
     public double GetValue(TypeId typeId)
     {
-      EAssert.Argument.IsTrue(values.ContainsKey(typeId), nameof(typeId), "Not registered.");
-      double ret = values[typeId];
+      EAssert.Argument.IsTrue(requests.ContainsKey(typeId), nameof(typeId), $"TypeId {typeId} not registered.");
+      if (values.TryGetValue(typeId, out double ret) == false)
+        ret = double.NaN;
       return ret;
     }
 
