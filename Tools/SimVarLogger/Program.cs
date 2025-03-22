@@ -4,7 +4,7 @@ using ESimConnect.Extenders;
 using Microsoft.Win32;
 
 string outDir = ".\\data";
-bool markSecondsInData = false;
+bool markSecondsInData = true;
 List<SimVarDef> simVars = new()
 {
   new ("PLANE ALT ABOVE GROUND"),
@@ -34,7 +34,7 @@ Dictionary<RequestId, SimVarDef> requests = new();
 Dictionary<RequestId, List<double>> values = new();
 RegisterSimVars(simVars, simCon, requests, values);
 
-ListeForSecondIfRequired(markSecondsInData, simCon, values);
+ListenForSecondIfRequired(markSecondsInData, simCon, values);
 
 Console.WriteLine("All ready, press any key to start, then later any key to exit.");
 
@@ -72,10 +72,11 @@ void SimTimeExtender_SimSecondElapsed()
 
 void Save(SimVarDef simVar, List<double> datas)
 {
-  string fileName = simVar.File ?? System.IO.Path.Combine(outDir, $"{simVar.Name.Replace(" ", "_").Replace(":", "-")}.txt");
+  string fileName = simVar.File != null && simVar.File.Length > 0 ? simVar.File : $"{simVar.Name.Replace(" ", "_").Replace(":", "-")}.txt";
+  fileName = System.IO.Path.Combine(outDir, fileName);
   fileName = System.IO.Path.GetFullPath(fileName);
-  Console.WriteLine($"Storing {simVar} with {datas.Count} records to {fileName}.");
-  var lines = string.Join("\n", datas);
+  Console.WriteLine($"Storing {simVar.Name} with {datas.Count} records to {fileName}.");
+  var lines = string.Join("\n", datas.Select(q=>q.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US"))));
   System.IO.File.WriteAllText(fileName, lines);
 }
 
@@ -109,11 +110,11 @@ static void OpenSimCon(ESimConnect.ESimConnect simCon)
   Thread.Sleep(1000);
 }
 
-void ListeForSecondIfRequired(bool markSecondsInData, ESimConnect.ESimConnect simCon, Dictionary<RequestId, List<double>> values)
+void ListenForSecondIfRequired(bool markSecondsInData, ESimConnect.ESimConnect simCon, Dictionary<RequestId, List<double>> values)
 {
   if (markSecondsInData)
   {
-    ESimConnect.Extenders.SimTimeExtender extTime = new(simCon, false);
+    SimTimeExtender extTime = new(simCon, true);
     extTime.SimSecondElapsed += SimTimeExtender_SimSecondElapsed;
   }
 }
