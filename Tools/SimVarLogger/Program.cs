@@ -1,55 +1,40 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using ESimConnect;
+﻿using ESimConnect;
+using ESimConnect.Definitions;
+using ESimConnect.Extenders;
 using Microsoft.Win32;
 
 string outDir = ".\\data";
-List<string> simVars = new List<string>()
+bool markSecondsInData = false;
+List<SimVarDef> simVars = new()
 {
-  "PLANE ALT ABOVE GROUND",
-  "SIM ON GROUND",
-  "VERTICAL SPEED;feet/minute",
-  "ACCELERATION BODY Y",
-  "GEAR IS ON GROUND:0",
-  "GEAR IS ON GROUND:1",
-  "GEAR IS ON GROUND:2"
+  new ("PLANE ALT ABOVE GROUND"),
+  new ("SIM ON GROUND"),
+  new ("SIM ON GROUND", Period: SimConnectPeriod.SECOND, File:"SIM_ON_GROUND_SECOND.txt"),
+  new ("VERTICAL SPEED",Unit:"feet/minute"),
+  new ("VERTICAL SPEED", Unit:"feet/minute", Period:SimConnectPeriod.SECOND, File:"VERTICAL_SPEED_SECOND.txt"),
+  new ("ACCELERATION BODY Y"),
+  new ("GEAR IS ON GROUND:0"),
+  new ("GEAR IS ON GROUND:1"),
+  new ("GEAR IS ON GROUND:2")
 };
 
-var simCon = new ESimConnect.ESimConnect();
+ESimConnect.ESimConnect simCon = new();
 
 Console.WriteLine($"Output path: \t'{outDir}'");
 Directory.CreateDirectory(outDir);
 
-Console.WriteLine("Collected simvars:");
+Console.WriteLine("Collected SimVars:");
 simVars.ForEach(q => Console.WriteLine($"\t{q}"));
 
 Console.WriteLine("Opening");
-simCon.Open();
-Thread.Sleep(1000);
+OpenSimCon(simCon);
 
 Console.WriteLine("Registering");
-Dictionary<RequestId, string> requests = new();
+Dictionary<RequestId, SimVarDef> requests = new();
 Dictionary<RequestId, List<double>> values = new();
-foreach (var simVar in simVars)
-{
-  string unit;
-  string sv;
-  if (simVar.Contains(";"))
-  {
-    string[] pts = simVar.Split(";");
-    sv = pts[0];
-    unit = pts[1];
-  }
-  else
-  {
-    sv = simVar;
-    unit = "Number";
-  }
-  TypeId typeId = simCon.Values.Register<double>(sv, unit);
-  RequestId requestId = simCon.Values.RequestRepeatedly(typeId, SimConnectPeriod.SIM_FRAME, false);
-  requests[requestId] = sv;
-  values[requestId] = new List<double>();
-}
+RegisterSimVars(simVars, simCon, requests, values);
+
+ListeForSecondIfRequired(markSecondsInData, simCon, values);
 
 Console.WriteLine("All ready, press any key to start, then later any key to exit.");
 
@@ -72,9 +57,22 @@ foreach (var requestId in requests.Keys)
   Save(simVar, datas);
 }
 
-void Save(string simVar, List<double> datas)
+// functions
+void SimTimeExtender_SimSecondElapsed()
 {
-  string fileName = System.IO.Path.Combine(outDir, $"{simVar.Replace(" ", "_").Replace(":", "-")}.txt");
+  foreach (var key in values.Keys)
+  {
+    var lst = values[key];
+    lock (lst)
+    {
+      lst.Add(double.NaN);
+    }
+  }
+}
+
+void Save(SimVarDef simVar, List<double> datas)
+{
+  string fileName = simVar.File ?? System.IO.Path.Combine(outDir, $"{simVar.Name.Replace(" ", "_").Replace(":", "-")}.txt");
   fileName = System.IO.Path.GetFullPath(fileName);
   Console.WriteLine($"Storing {simVar} with {datas.Count} records to {fileName}.");
   var lines = string.Join("\n", datas);
@@ -85,6 +83,39 @@ void SimCon_DataReceived(ESimConnect.ESimConnect sender, ESimConnect.ESimConnect
 {
   if (values.TryGetValue(e.RequestId, out List<double>? lst))
   {
-    lst.Add((double)e.Data);
+    lock (lst)
+    {
+      lst.Add((double)e.Data);
+    }
   }
 }
+
+static void RegisterSimVars(List<SimVarDef> simVars, ESimConnect.ESimConnect simCon, Dictionary<RequestId, SimVarDef> requests, Dictionary<RequestId, List<double>> values)
+{
+  foreach (var simVar in simVars)
+  {
+    string unit;
+    string sv;
+    TypeId typeId = simCon.Values.Register<double>(sv = simVar.Name, unit = simVar.Unit);
+    RequestId requestId = simCon.Values.RequestRepeatedly(typeId, simVar.Period, false);
+    requests[requestId] = simVar;
+    values[requestId] = new List<double>();
+  }
+}
+
+static void OpenSimCon(ESimConnect.ESimConnect simCon)
+{
+  simCon.Open();
+  Thread.Sleep(1000);
+}
+
+void ListeForSecondIfRequired(bool markSecondsInData, ESimConnect.ESimConnect simCon, Dictionary<RequestId, List<double>> values)
+{
+  if (markSecondsInData)
+  {
+    ESimConnect.Extenders.SimTimeExtender extTime = new(simCon, false);
+    extTime.SimSecondElapsed += SimTimeExtender_SimSecondElapsed;
+  }
+}
+
+record SimVarDef(string Name, string Unit = "Number", SimConnectPeriod Period = SimConnectPeriod.SIM_FRAME, string File = "");
