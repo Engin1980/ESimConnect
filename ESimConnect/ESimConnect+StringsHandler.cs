@@ -88,7 +88,7 @@ namespace ESimConnect
             break;
           case StringLength._32:
             dataDef = () => this.parent.simConnect!.AddToDataDefinition(typeId.ToEEnum(),
-              simVarName, "", SIMCONNECT_DATATYPE.STRING8, 0, SimConnect.SIMCONNECT_UNUSED);
+              simVarName, "", SIMCONNECT_DATATYPE.STRING32, 0, SimConnect.SIMCONNECT_UNUSED);
             structDef = () => this.parent.simConnect!.RegisterDataDefineStruct<String32Struct>(typeId.ToEEnum());
             stringType = typeof(String32Struct);
             break;
