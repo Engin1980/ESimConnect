@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Xps.Serialization;
+using static ESimConnect.Types.RequestsManager;
 
 namespace ESimConnect.Extenders
 {
@@ -66,9 +67,11 @@ namespace ESimConnect.Extenders
     public class Options
     {
       public int BufferSize { get; set; } = 20;
+      public bool AutoStartOnCreation { get; set; } = false;
     }
 
-    private bool isRegistered;
+    private bool isRegistered = false;
+    private bool isRunning = false;
     private int simOnGroundFlag = 0;
     private readonly TypeId dataTypeId;
     private readonly RequestId dataRequestId;
@@ -77,11 +80,13 @@ namespace ESimConnect.Extenders
     private readonly Options options;
     private int? touchDownEvalDataIndexFlag = null;
     private int dataIndexFlag = 0;
-    public event Action<VerticalSpeedExtender>? OnTouchdownDetected;
-    public event Action<VerticalSpeedExtender, double>? OnTouchdownEvaluated;
+    private List<double> evaluatedTouchdowns = new();
     private int framesInCurrentSecond = 0;
     private int lastFramesPerSecond = 50;
     private readonly SimTimeExtender ste;
+
+    public event Action<VerticalSpeedExtender>? TouchdownDetected;
+    public event Action<VerticalSpeedExtender, double>? TouchdownEvaluated;
 
     public VerticalSpeedExtender(ESimConnect eSimConnect, Action<Options>? opts = null) : base(eSimConnect)
     {
@@ -96,15 +101,41 @@ namespace ESimConnect.Extenders
 
       lock (this)
       {
-        (this.dataTypeId, this.dataRequestId) = RegisterStruct();
+        this.dataTypeId = base.eSimCon.Structs.Register<DataStruct>();
+        this.dataRequestId = base.eSimCon.Structs.RequestRepeatedly(dataTypeId, SimConnectPeriod.NEVER, false);
         eSimCon.DataReceived += OnDataReceived;
         this.isRegistered = true;
       }
+
+      if (options.AutoStartOnCreation)
+        Start();
     }
+
+    public void Start()
+    {
+      if (isRunning) return;
+      if (isRegistered == false) throw new InvalidOperationException("Already disposed.");
+      lock (this)
+      {
+        base.eSimCon.Structs.RequestRepeatedly(this.dataRequestId, this.dataTypeId, SimConnectPeriod.SIM_FRAME, false);
+        this.isRunning = true;
+      }
+    }
+
+    public void Stop()
+    {
+      if (!isRunning) return;
+      lock (this)
+      {
+        base.eSimCon.Structs.RequestRepeatedly(this.dataRequestId, this.dataTypeId, SimConnectPeriod.NEVER);
+        this.isRunning = false;
+      }
+    }
+
+    public bool IsRunning => isRunning;
 
     private void OnSimSecondElapsed()
     {
-      Console.WriteLine("Tick length " + framesInCurrentSecond);
       lastFramesPerSecond = framesInCurrentSecond;
       framesInCurrentSecond = 0;
     }
@@ -125,7 +156,7 @@ namespace ESimConnect.Extenders
         if (this.simOnGroundFlag == 1) // is on ground
         {
           touchDownEvalDataIndexFlag = (dataIndexFlag + options.BufferSize / 2) % options.BufferSize;
-          this.OnTouchdownDetected?.Invoke(this);
+          this.TouchdownDetected?.Invoke(this);
         }
       }
       if (dataIndexFlag == touchDownEvalDataIndexFlag)
@@ -136,34 +167,13 @@ namespace ESimConnect.Extenders
         double gvs = ConvertDataToVerticalSpeed(g);
         double pvs = ConvertDataToVerticalSpeed(p);
         double vs = pvs - gvs;
-        this.OnTouchdownEvaluated?.Invoke(this, vs);
+        this.TouchdownEvaluated?.Invoke(this, vs);
 
         touchDownEvalDataIndexFlag = null;
       }
     }
 
-    private (TypeId, RequestId) RegisterStruct()
-    {
-      var typeId = base.eSimCon.Structs.Register<DataStruct>();
-      var requestId = base.eSimCon.Structs.RequestRepeatedly(typeId, SimConnectPeriod.SIM_FRAME, false);
-
-      return (typeId, requestId);
-    }
-
-    private void UnregisterStruct()
-    {
-      lock (this)
-      {
-        if (isRegistered)
-        {
-          base.eSimCon.Structs.RequestRepeatedly(this.dataRequestId, this.dataTypeId, SimConnectPeriod.NEVER);
-          base.eSimCon.Structs.Unregister(this.dataTypeId);
-          isRegistered = false;
-        }
-      }
-    }
-
-    public double GetGroundVerticalSpeed()
+    public double GetCurrentGroundVerticalSpeed()
     {
       var data = groundAltitude.GetData();
       var vs = ConvertDataToVerticalSpeed(data.ToArray());
@@ -186,16 +196,27 @@ namespace ESimConnect.Extenders
       return ret;
     }
 
-    public double GetPlaneVerticalSpeed()
+    public double GetCurrentPlaneVerticalSpeed()
     {
       var data = planeAltitude.GetData().ToArray();
       var vs = ConvertDataToVerticalSpeed(data);
       return vs;
     }
 
+    public List<double> GetEvaluatedTouchdowns() => evaluatedTouchdowns.ToList();
+    public void ClearEvaluatedTouchdowns() => evaluatedTouchdowns = new();
+
     public void Dispose()
     {
-      UnregisterStruct();
+      lock (this)
+      {
+        if (isRegistered)
+        {
+          base.eSimCon.Structs.RequestRepeatedly(this.dataRequestId, this.dataTypeId, SimConnectPeriod.NEVER);
+          base.eSimCon.Structs.Unregister(this.dataTypeId);
+          isRegistered = false;
+        }
+      }
     }
   }
 }
