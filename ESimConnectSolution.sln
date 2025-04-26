@@ -34,6 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{EB4BD3C8
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimVarLogger", "Tools\SimVarLogger\SimVarLogger.csproj", "{F8B71CE3-FF09-4622-8B77-EDAEBFCD0FB2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerticalSpeedTester", "Tools\VerticalSpeedTester\VerticalSpeedTester.csproj", "{A10EB82D-DF45-4126-8217-5E8D6A3BD604}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{F8B71CE3-FF09-4622-8B77-EDAEBFCD0FB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8B71CE3-FF09-4622-8B77-EDAEBFCD0FB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8B71CE3-FF09-4622-8B77-EDAEBFCD0FB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A10EB82D-DF45-4126-8217-5E8D6A3BD604}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A10EB82D-DF45-4126-8217-5E8D6A3BD604}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A10EB82D-DF45-4126-8217-5E8D6A3BD604}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A10EB82D-DF45-4126-8217-5E8D6A3BD604}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +98,7 @@ Global
 		{23D67489-0988-4EB6-8E21-D240F431AC2E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B4FF5318-3EF2-4C13-A2DC-D59750E41A46} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{F8B71CE3-FF09-4622-8B77-EDAEBFCD0FB2} = {EB4BD3C8-0EA1-428A-82C4-214F24E6EFCA}
+		{A10EB82D-DF45-4126-8217-5E8D6A3BD604} = {EB4BD3C8-0EA1-428A-82C4-214F24E6EFCA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E1CEC6B8-45BC-4B0C-98ED-A0B48A9D3EA7}
