@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Windows.Xps.Serialization;
 
 namespace ESimConnect.Extenders
 {
@@ -78,6 +79,9 @@ namespace ESimConnect.Extenders
     private int dataIndexFlag = 0;
     public event Action<VerticalSpeedExtender>? OnTouchdownDetected;
     public event Action<VerticalSpeedExtender, double>? OnTouchdownEvaluated;
+    private int framesInCurrentSecond = 0;
+    private int lastFramesPerSecond = 50;
+    private readonly SimTimeExtender ste;
 
     public VerticalSpeedExtender(ESimConnect eSimConnect, Action<Options>? opts = null) : base(eSimConnect)
     {
@@ -87,6 +91,9 @@ namespace ESimConnect.Extenders
       this.groundAltitude = new(options.BufferSize);
       this.planeAltitude = new(options.BufferSize);
 
+      ste = new(eSimConnect, true);
+      ste.SimSecondElapsed += OnSimSecondElapsed;
+
       lock (this)
       {
         (this.dataTypeId, this.dataRequestId) = RegisterStruct();
@@ -95,11 +102,19 @@ namespace ESimConnect.Extenders
       }
     }
 
+    private void OnSimSecondElapsed()
+    {
+      Console.WriteLine("Tick length " + framesInCurrentSecond);
+      lastFramesPerSecond = framesInCurrentSecond;
+      framesInCurrentSecond = 0;
+    }
+
     private void OnDataReceived(ESimConnect sender, ESimConnect.ESimConnectDataReceivedEventArgs e)
     {
       if (e.RequestId != this.dataRequestId) return;
 
       DataStruct data = (DataStruct)e.Data;
+      framesInCurrentSecond++;
 
       dataIndexFlag = (dataIndexFlag + 1) % options.BufferSize;
       groundAltitude.Add(data.groundAltitude);
@@ -165,7 +180,7 @@ namespace ESimConnect.Extenders
       for (int i = 0; i < data.Length - 1; i++)
       {
         tmp[i] = data[i + 1] - data[i];
-        tmp[i] = tmp[i] / options.BufferSize * 50 * 60; // convert to feet/min
+        tmp[i] = tmp[i] * lastFramesPerSecond * 60; // convert to feet/min
       }
       ret = tmp.Average();
       return ret;
@@ -173,8 +188,8 @@ namespace ESimConnect.Extenders
 
     public double GetPlaneVerticalSpeed()
     {
-      var data = planeAltitude.GetData();
-      var vs = ConvertDataToVerticalSpeed(data.ToArray());
+      var data = planeAltitude.GetData().ToArray();
+      var vs = ConvertDataToVerticalSpeed(data);
       return vs;
     }
 
