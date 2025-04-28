@@ -68,9 +68,17 @@ namespace ESimConnect.Extenders
 
     public class Options
     {
-      public int BufferSize { get; set; } = 20;
+      public int BufferSize { get; set; } = DEFAULT_BUFFER_SIZE;
       public bool AutoStartOnCreation { get; set; } = false;
     }
+
+    /// <summary>
+    /// Default buffer size for the data buffer.
+    /// </summary>
+    /// <remarks>
+    /// Greater value (20) caused that irrelevant border values were taken into account.
+    /// </remarks>
+    private const int DEFAULT_BUFFER_SIZE = 10;
 
     private bool isRegistered = false;
     private bool isRunning = false;
@@ -170,12 +178,18 @@ namespace ESimConnect.Extenders
         double[] g = this.groundAltitude.GetData().ToArray();
         double[] p = this.planeAltitude.GetData().ToArray();
 
+        // take full data for ground VS calculation
+        // but, take only first half of the data for airplane VS calculation:
+        double[] tmp = new double[(g.Length + 1) / 2];
+        Array.Copy(g, 0, tmp, 0, tmp.Length);
+        g = tmp;
+
         double gvs = ConvertDataToVerticalSpeed(g);
         double pvs = ConvertDataToVerticalSpeed(p);
         double vs = pvs - gvs;
         this.evaluatedTouchdowns.Add(vs);
 
-        LogSave(vs, g, p);
+        //LogSave(vs, g, p);
 
         this.TouchdownEvaluated?.Invoke(this, vs);
       }
@@ -213,7 +227,8 @@ namespace ESimConnect.Extenders
 
     private double ConvertDataToVerticalSpeed(double[] data)
     {
-      if (data.Length < 2) return double.NaN;
+      if (data.Length < 1) return double.NaN;
+      if (data.Length < 2) return data[0];
 
       double[] tmp = new double[data.Length - 1];
       double ret;

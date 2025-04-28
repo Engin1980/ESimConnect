@@ -12,6 +12,7 @@ ESimConnect.Extenders.VerticalSpeedExtender vse = new(simCon);
 vse.TouchdownDetected += (sender) => Console.WriteLine("Touchdown detected");
 vse.TouchdownEvaluated += (sender, e) => Console.WriteLine($"Touchdown evaluated: {e:N3} ft/min");
 
+vse.Start();
 Console.WriteLine("Running");
 
 while (true)
