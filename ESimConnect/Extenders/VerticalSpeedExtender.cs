@@ -1,7 +1,9 @@
 ﻿using ESimConnect.Definitions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.RightsManagement;
 using System.Text;
@@ -173,7 +175,32 @@ namespace ESimConnect.Extenders
         double vs = pvs - gvs;
         this.evaluatedTouchdowns.Add(vs);
 
+        LogSave(vs, g, p);
+
         this.TouchdownEvaluated?.Invoke(this, vs);
+      }
+    }
+
+    private void LogSave(double vs, double[] galt, double[] palt)
+    {
+      double[] gvs = new double[galt.Length - 1];
+      double[] pvs = new double[palt.Length - 1];
+
+      for (int i = 1; i < galt.Length; i++)
+      {
+        gvs[i - 1] = galt[i] - galt[i - 1];
+        gvs[i - 1] = gvs[i - 1] * lastFramesPerSecond * 60;
+        pvs[i - 1] = palt[i] - palt[i - 1];
+        pvs[i - 1] = pvs[i - 1] * lastFramesPerSecond * 60;
+      }
+
+      string fileName = $"C:\\temp\\vs_{vs:N3}.txt";
+      using FileStream fs = new(fileName, FileMode.Create);
+      using StreamWriter sw = new(fs);
+      sw.WriteLine($"gnd_alt\tgnd_vs\tpln_alt\tpln_vs");
+      for (int i = 0; i < gvs.Length; i++)
+      {
+        sw.WriteLine($"{galt[i + 1]:N3}\t{gvs[i]:N3}\t{palt[i + 1]:N3}\t{pvs[i]:N3}");
       }
     }
 
