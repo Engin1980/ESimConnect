@@ -164,15 +164,16 @@ namespace ESimConnect.Extenders
       }
       if (dataIndexFlag == touchDownEvalDataIndexFlag)
       {
+        touchDownEvalDataIndexFlag = null;
         double[] g = this.groundAltitude.GetData().ToArray();
         double[] p = this.planeAltitude.GetData().ToArray();
 
         double gvs = ConvertDataToVerticalSpeed(g);
         double pvs = ConvertDataToVerticalSpeed(p);
         double vs = pvs - gvs;
-        this.TouchdownEvaluated?.Invoke(this, vs);
+        this.evaluatedTouchdowns.Add(vs);
 
-        touchDownEvalDataIndexFlag = null;
+        this.TouchdownEvaluated?.Invoke(this, vs);
       }
     }
 
