@@ -74,7 +74,7 @@ namespace ESimConnect.Extenders
     private bool isRunning = false;
     private int simOnGroundFlag = 0;
     private readonly TypeId dataTypeId;
-    private readonly RequestId dataRequestId;
+    private RequestId? dataRequestId = null;
     private readonly DataBuffer groundAltitude;
     private readonly DataBuffer planeAltitude;
     private readonly Options options;
@@ -102,7 +102,6 @@ namespace ESimConnect.Extenders
       lock (this)
       {
         this.dataTypeId = base.eSimCon.Structs.Register<DataStruct>();
-        this.dataRequestId = base.eSimCon.Structs.RequestRepeatedly(dataTypeId, SimConnectPeriod.NEVER, false);
         eSimCon.DataReceived += OnDataReceived;
         this.isRegistered = true;
       }
@@ -117,7 +116,10 @@ namespace ESimConnect.Extenders
       if (isRegistered == false) throw new InvalidOperationException("Already disposed.");
       lock (this)
       {
-        base.eSimCon.Structs.RequestRepeatedly(this.dataRequestId, this.dataTypeId, SimConnectPeriod.SIM_FRAME, false);
+        if (dataRequestId == null)
+          this.dataRequestId = base.eSimCon.Structs.RequestRepeatedly(this.dataTypeId, SimConnectPeriod.SIM_FRAME, false);
+        else
+          base.eSimCon.Structs.RequestRepeatedly(this.dataRequestId.Value, this.dataTypeId, SimConnectPeriod.SIM_FRAME, false);
         this.isRunning = true;
       }
     }
@@ -127,7 +129,8 @@ namespace ESimConnect.Extenders
       if (!isRunning) return;
       lock (this)
       {
-        base.eSimCon.Structs.RequestRepeatedly(this.dataRequestId, this.dataTypeId, SimConnectPeriod.NEVER);
+        if (this.dataRequestId != null)
+          base.eSimCon.Structs.RequestRepeatedly(this.dataRequestId.Value, this.dataTypeId, SimConnectPeriod.NEVER);
         this.isRunning = false;
       }
     }
@@ -212,7 +215,7 @@ namespace ESimConnect.Extenders
       {
         if (isRegistered)
         {
-          base.eSimCon.Structs.RequestRepeatedly(this.dataRequestId, this.dataTypeId, SimConnectPeriod.NEVER);
+          Stop();
           base.eSimCon.Structs.Unregister(this.dataTypeId);
           isRegistered = false;
         }

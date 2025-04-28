@@ -192,6 +192,7 @@ namespace ESimConnect
           .Where(q => q.Kind == KindOfTypeId.STRUCT && typeIds.Contains(q.TypeId));
 
         var periodicalRequests = requests.Where(q => q.Period != null);
+        periodicalRequests = periodicalRequests.Where(q => q.Period != SIMCONNECT_PERIOD.NEVER); // unable twice call NEVER (will throw SimConException)
         if (periodicalRequests.Any())
         {
           foreach (var request in periodicalRequests)
