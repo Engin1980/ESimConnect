@@ -10,18 +10,23 @@ The library needs Windows .NET 6.0 runtime to be installed (it is included in Wi
 
 ## Instalation & Usage in your project
 
-Download the release and unpack it to obtain .DLL and other files.
+Download the release and unpack it to obtain .DLL and other files. 
+
+> **Follow carefully all the following steps!**
 
 To add library to your project:
 * Ensure project is .NET 6.0 (or higher)
-* Ensure project target OS is Windows and version 7.0
-* Add dependencies:
+* Ensure project target OS is Windows and version 7.0, targeted for `x64` build.
+* Ensure project uses WPF (in `.csproj`, add `<UseWPF>true</UseWPF>`) *)
+* Add references/dependencies into the project:
   * `Microsoft.FlightSimulator.SimConnect.dll` 
   * `ESimConnect.dll`
   * `ESystem.dll`.
 * Ensure `SimConnect.dll` is copied in the output/startup directory and **not** referenced as a dependency.
 
 If unsure, just check any example project in this repository.
+
+*) - for unknown reason, this is required for some project. Otherwise, you may get an issue with linking WindowBase.dll of version 4 vs 6 together. So far, I have no clue what is causing this. 
 
 ## Examples
 
@@ -55,8 +60,8 @@ If anything does not work, feel free to report it as an [issue](https://github.c
 
 Q: On startup, an error occurs: `System.IO.FileNotFoundException: 'Could not load file or assembly 'Microsoft.FlightSimulator.SimConnect, Version=11.0.62651.3, Culture=neutral, PublicKeyToken=baf445ffb3a06b5c'.`
 
-A: There are either 'Microsoft.FlightSimulator.SimConnect.dll' or 
-'SimConnect.dll' file(s) missing in the working directory.
+A: There are either `Microsoft.FlightSimulator.SimConnect.dll` or 
+`SimConnect.dll` file(s) missing in the working directory, OR your project is not targeted for `x64` build.
 
 ## License
 
