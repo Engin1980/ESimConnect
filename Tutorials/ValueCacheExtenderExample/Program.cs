@@ -20,7 +20,7 @@ ESimConnect.Extenders.ValueCacheExtender valueCache = new(simCon, SimConnectPeri
 valueCache.ValueChanged += ValueCache_ValueChanged;
 
 // open the connection; once connected, invoke 'onConnected()' function
-openInBackgroundExtender.OpenInBackground(onConnected);
+openInBackgroundExtender.OpenRepeatedlyUntilSuccess(onConnected, ESimConnect.Extenders.OpenInBackgroundExtender.OnOpenActionRepeatMode.FirstOnly);
 
 
 Thread.Sleep(30000);

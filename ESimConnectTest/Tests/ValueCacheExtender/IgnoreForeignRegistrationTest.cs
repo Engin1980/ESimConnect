@@ -31,7 +31,7 @@ namespace ESimConnectTest.Tests.ValueCacheExtender
       valueCacheExtender.ValueChanged += ValueCacheExtender_ValueChanged;
 
       logger.Log(LogLevel.INFO, "Opening in background");
-      openInBackgroundExtender.OpenInBackground();
+      openInBackgroundExtender.OpenRepeatedlyUntilSuccess();
       logger.Log(LogLevel.INFO, "Waiting for end.");
 
       while (dataCounter < MAX_DATA_COUNTER)

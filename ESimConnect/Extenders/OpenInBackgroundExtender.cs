@@ -1,5 +1,6 @@
 ﻿using ESystem.Asserting;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,64 @@ namespace ESimConnect.Extenders
   /// </summary>
   public class OpenInBackgroundExtender : AbstractExtender
   {
+    /// <summary>
+    /// Defines how the action is invoked when ESimConnect is opened.
+    /// </summary>
+    public enum OnOpenActionRepeatMode
+    {
+      /// <summary>
+      /// Specifies whether the action should be invoked only once when ESimConnect is opened/connected for the first time.
+      /// </summary>
+      FirstOnly,
+      /// <summary>
+      /// Specifies whether the action should be invoked always when ESimConnect is opened/connected..
+      /// </summary>
+      Always
+    }
+
+    private class ThreadSafeHashSet<T> : IEnumerable<T>
+    {
+      private readonly HashSet<T> set = new HashSet<T>();
+      private readonly object lck = new();
+      public void Add(T item)
+      {
+        lock (lck)
+        {
+          set.Add(item);
+        }
+      }
+
+      public void Clear()
+      {
+        lock (lck)
+        {
+          set.Clear();
+        }
+      }
+
+      public IEnumerator<T> GetEnumerator()
+      {
+        HashSet<T> copy;
+        
+        lock(lck)
+        {
+          copy = new HashSet<T>(set);
+        }
+
+        return copy.GetEnumerator();
+      }
+
+      public void Remove(T item)
+      {
+        lock (lck)
+        {
+          set.Remove(item);
+        }
+      }
+
+      IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
     private const int OPENING_STATE_UNSET = 0;
     private const int OPENING_STATE_OPENING = 1;
     private const int OPENING_STATE_OPENED = 2;
@@ -24,7 +83,8 @@ namespace ESimConnect.Extenders
     private readonly int initialDelay;
     private readonly int repeatedDelay;
     private readonly Timer connectionTimer;
-    private readonly HashSet<Action> onConnectedActions = new();
+    private readonly ThreadSafeHashSet<Action> onConnectedAlwaysActions = new();
+    private readonly ThreadSafeHashSet<Action> onConnectedOnceActions = new();
 
     /// <summary>
     /// Invoked when ESimConnect is opened.
@@ -94,26 +154,60 @@ namespace ESimConnect.Extenders
 
       if (this.IsOpened)
       {
-        lock (onConnectedActions)
-        {
-          foreach (var item in onConnectedActions)
-          {
-            Task t = new(item);
-            t.Start();
-          }
-        }
+        DoAfterOpenActions();
         Opened?.Invoke();
       }
     }
 
-    /// <summary>
-    /// Starts opening in background. Non-blocking call. If ESimConnect is opened, then event is invoked.
-    /// </summary>
-    /// <param name="onStarted">Additional content invoked after successfull open (alternating option to 'Opened' event).</param>
-    public void OpenInBackground(Action? onStarted = null)
+    private void DoAfterOpenActions()
     {
-      AddOnStartedIfRequired(onStarted);
+      foreach (var action in onConnectedAlwaysActions)
+      {
+        Task t = new(action);
+        t.Start();
+      }
+      foreach (var action in onConnectedOnceActions)
+      {
+        Task t = new(action);
+        t.Start();
+      }
+      onConnectedOnceActions.Clear();
+    }
 
+    /// <summary>
+    /// Invokes the specified action when the connection is established, based on the specified repeat mode.
+    /// </summary>
+    /// <remarks>If the connection is already established when this method is called, the action is executed
+    /// immediately on a separate task. Otherwise, the action is queued to be executed based on the specified repeat
+    /// mode.</remarks>
+    /// <param name="action">The action to invoke when the connection is established. Cannot be <see langword="null"/>.</param>
+    /// <param name="mode">Specifies the repeat mode for the action. Use <see cref="OnOpenActionRepeatMode.Always"/> to invoke the action
+    /// every time the connection is established,  or <see cref="OnOpenActionRepeatMode.FirstOnly"/> to invoke the
+    /// action only the first time the connection is established.</param>
+    public void InvokeWhenConnected(Action action, OnOpenActionRepeatMode mode)
+    {
+      if (mode == OnOpenActionRepeatMode.Always)
+        onConnectedAlwaysActions.Add(action);
+
+      if (this.openingStateFlag == OPENING_STATE_OPENED)
+      {
+        Task t = new(action);
+        t.Start();
+      }
+      else 
+      {
+        if (mode == OnOpenActionRepeatMode.FirstOnly)
+        {
+          onConnectedOnceActions.Add(action);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Starts connecting in background. Non-blocking call. If ESimConnect is opened, then event is invoked.
+    /// </summary>
+    public void OpenRepeatedlyUntilSuccess()
+    {
       if (this.openingStateFlag == OPENING_STATE_OPENED) return;
 
       int currentIsOpeningFlag = System.Threading.Interlocked.Exchange(ref this.openingStateFlag, OPENING_STATE_OPENING);
@@ -124,20 +218,16 @@ namespace ESimConnect.Extenders
       }
     }
 
-    private void AddOnStartedIfRequired(Action? onStarted)
+    /// <summary>
+    /// Starts connecting in background. Non-blocking call. If ESimConnect is opened, then event is invoked.
+    /// </summary>
+    /// <param name="onOpenedAction">Action to invoke when ESimConnect is opened.</param> -->
+    /// <param name="mode">Mode of invoking action when ESimConnect is opened.</param>
+    public void OpenRepeatedlyUntilSuccess(Action onOpenedAction, OnOpenActionRepeatMode mode)
     {
-      if (onStarted == null) return;
+      InvokeWhenConnected(onOpenedAction, mode);
+      OpenRepeatedlyUntilSuccess();
+    }
 
-      lock (this.onConnectedActions)
-      {
-        if (IsOpened)
-        {
-          Task t = new(onStarted);
-          t.Start();
-        }
-        else
-          onConnectedActions.Add(onStarted);
-      }
-    }    
   }
 }

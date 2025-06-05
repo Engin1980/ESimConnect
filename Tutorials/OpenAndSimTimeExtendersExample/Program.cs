@@ -12,7 +12,7 @@ ESimConnect.Extenders.SimTimeExtender simTimeExtender = new(simCon, true);
 simTimeExtender.SimSecondElapsed += SimTimeExtender_SimSecondElapsed;
 
 // open the connection; once connected, invoke 'onConnected()' function
-openInBackgroundExtender.OpenInBackground(onConnected);
+openInBackgroundExtender.OpenRepeatedlyUntilSuccess(onConnected, ESimConnect.Extenders.OpenInBackgroundExtender.OnOpenActionRepeatMode.FirstOnly);
 
 // let the app run for some time; needed as code is started in 'onConnected()'
 Thread.Sleep(30000);
