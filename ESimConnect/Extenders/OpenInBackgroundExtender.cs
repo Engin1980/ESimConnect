@@ -24,7 +24,7 @@ namespace ESimConnect.Extenders
     private readonly int initialDelay;
     private readonly int repeatedDelay;
     private readonly Timer connectionTimer;
-    private readonly HashSet<Action> onStartedActions = new();
+    private readonly HashSet<Action> onConnectedActions = new();
 
     /// <summary>
     /// Invoked when ESimConnect is opened.
@@ -75,8 +75,8 @@ namespace ESimConnect.Extenders
     {
       try
       {
-        System.Threading.Interlocked.Exchange(ref this.openingStateFlag, OPENING_STATE_OPENED);
         this.eSimCon.Open();
+        System.Threading.Interlocked.Exchange(ref this.openingStateFlag, OPENING_STATE_OPENED);
       }
       catch (ESimConnectException ex)
       {
@@ -94,9 +94,9 @@ namespace ESimConnect.Extenders
 
       if (this.IsOpened)
       {
-        lock (onStartedActions)
+        lock (onConnectedActions)
         {
-          foreach (var item in onStartedActions)
+          foreach (var item in onConnectedActions)
           {
             Task t = new(item);
             t.Start();
@@ -128,7 +128,7 @@ namespace ESimConnect.Extenders
     {
       if (onStarted == null) return;
 
-      lock (this.onStartedActions)
+      lock (this.onConnectedActions)
       {
         if (IsOpened)
         {
@@ -136,8 +136,8 @@ namespace ESimConnect.Extenders
           t.Start();
         }
         else
-          onStartedActions.Add(onStarted);
+          onConnectedActions.Add(onStarted);
       }
-    }
+    }    
   }
 }
