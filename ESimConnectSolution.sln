@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimVarLogger", "Tools\SimVa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerticalSpeedTester", "Tools\VerticalSpeedTester\VerticalSpeedTester.csproj", "{A10EB82D-DF45-4126-8217-5E8D6A3BD604}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESimConnectClientEvent", "Tutorials\ESimConnectClientEvent\ESimConnectClientEvent.csproj", "{EBB24D53-9C3C-4CFE-B09F-991CBD2FB0BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,10 @@ Global
 		{A10EB82D-DF45-4126-8217-5E8D6A3BD604}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A10EB82D-DF45-4126-8217-5E8D6A3BD604}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A10EB82D-DF45-4126-8217-5E8D6A3BD604}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBB24D53-9C3C-4CFE-B09F-991CBD2FB0BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBB24D53-9C3C-4CFE-B09F-991CBD2FB0BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBB24D53-9C3C-4CFE-B09F-991CBD2FB0BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBB24D53-9C3C-4CFE-B09F-991CBD2FB0BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,6 +105,7 @@ Global
 		{B4FF5318-3EF2-4C13-A2DC-D59750E41A46} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{F8B71CE3-FF09-4622-8B77-EDAEBFCD0FB2} = {EB4BD3C8-0EA1-428A-82C4-214F24E6EFCA}
 		{A10EB82D-DF45-4126-8217-5E8D6A3BD604} = {EB4BD3C8-0EA1-428A-82C4-214F24E6EFCA}
+		{EBB24D53-9C3C-4CFE-B09F-991CBD2FB0BB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E1CEC6B8-45BC-4B0C-98ED-A0B48A9D3EA7}
