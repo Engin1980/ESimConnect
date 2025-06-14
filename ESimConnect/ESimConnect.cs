@@ -252,11 +252,10 @@ namespace ESimConnect
         this.Strings.UnregisterAll();
         this.SystemEvents.UnregisterAll();
 
-        this.winHandleManager.Dispose();
-
         this.simConnect.Dispose();
         this.simConnect = null;
       }
+      this.winHandleManager.Dispose();
       logger.LogMethodEnd();
     }
 
