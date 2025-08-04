@@ -96,7 +96,7 @@ namespace ESimConnect.Types
               else
               {
                 string s = ExpandExceptionString(ex);
-                Logger.Log(this, LogLevel.ERROR, "DefWndProc EXCEPTION " + s);
+                logger.Log(LogLevel.ERROR, "DefWndProc EXCEPTION " + s);
                 this.ExceptionRaised?.Invoke(ex);
               }
             }
@@ -125,6 +125,7 @@ namespace ESimConnect.Types
 
     public void Release()
     {
+      logger.LogMethodStart();
       void destroyWindowHandle()
       {
         if (this.hwndSource != null)
@@ -150,7 +151,6 @@ namespace ESimConnect.Types
         this.window = null;
         this.windowHandle = IntPtr.Zero;
       }
-      ;
 
       if (Application.Current == null)
         destroyWindowHandle();
@@ -159,6 +159,7 @@ namespace ESimConnect.Types
 
       while (this.windowHandle != IntPtr.Zero)
         Thread.Sleep(50);
+      logger.LogMethodEnd();
     }
 
     private void CreateWindow()
@@ -172,7 +173,6 @@ namespace ESimConnect.Types
         this.windowHandle = new WindowInteropHelper(window).Handle;
         this.window = window;
       }
-      ;
 
       if (Application.Current == null)
       {
@@ -197,7 +197,6 @@ namespace ESimConnect.Types
     public void Dispose()
     {
       Release();
-      GC.SuppressFinalize(this);
     }
   }
 }

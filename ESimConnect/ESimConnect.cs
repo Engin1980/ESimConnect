@@ -346,6 +346,7 @@ namespace ESimConnect
     {
       logger.LogObject("Event " + nameof(SimConnect_OnRecvQuit), data);
       this.Disconnected?.Invoke(this);
+      this.ResolveExitedFS2020();
     }
 
     private void SimConnect_OnRecvSimobjectData(SimConnect _, SIMCONNECT_RECV_SIMOBJECT_DATA data)
