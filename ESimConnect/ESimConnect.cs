@@ -277,7 +277,7 @@ namespace ESimConnect
       EnsureNotConnected();
 
       Try(
-        () => winHandleManager.Acquire(),
+        () => winHandleManager.AcquireIfRequired(),
         ex => new InternalException("Failed to register windows queue handler.", ex));
 
       Try(() =>

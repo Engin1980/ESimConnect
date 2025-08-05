@@ -17,6 +17,9 @@ openInBackgroundExtender.OpenRepeatedlyUntilSuccess(onConnected, ESimConnect.Ext
 // let the app run for some time; needed as code is started in 'onConnected()'
 Thread.Sleep(30000);
 
+// if no success after 30 seconds, abort the attempts
+openInBackgroundExtender.AbortOpening();
+
 // this will run once the connection is established
 void onConnected()
 {

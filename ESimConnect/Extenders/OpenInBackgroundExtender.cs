@@ -54,8 +54,8 @@ namespace ESimConnect.Extenders
       public IEnumerator<T> GetEnumerator()
       {
         HashSet<T> copy;
-        
-        lock(lck)
+
+        lock (lck)
         {
           copy = new HashSet<T>(set);
         }
@@ -194,7 +194,7 @@ namespace ESimConnect.Extenders
         Task t = new(action);
         t.Start();
       }
-      else 
+      else
       {
         if (mode == OnOpenActionRepeatMode.FirstOnly)
         {
@@ -229,5 +229,22 @@ namespace ESimConnect.Extenders
       OpenRepeatedlyUntilSuccess();
     }
 
+    /// <summary>
+    /// Aborts any ongoing background connection attempts to ESimConnect and optionally clears all queued actions.
+    /// </summary>
+    /// <param name="clearCurrentOpeningActions">
+    /// If <c>true</c> (default), clears all actions that were scheduled to be invoked upon a successful connection.
+    /// If <c>false</c>, preserves the queued actions for future connection attempts.
+    /// </param>
+    public void AbortOpening(bool clearCurrentOpeningActions = true)
+    {
+      connectionTimer.Stop();
+      this.openingStateFlag = OPENING_STATE_UNSET;
+      if (clearCurrentOpeningActions)
+      {
+        onConnectedOnceActions.Clear();
+        onConnectedAlwaysActions.Clear();
+      }
+    }
   }
 }
